@@ -244,3 +244,57 @@ describe('oversubscription', () => {
     await waitFor(() => expect(within(okafor).getByText('Oversubscribed')).toBeTruthy());
   });
 });
+
+describe('reset demo data', () => {
+  it('restores the shipped rates after confirmation, and tells Delivery to re-read everyone', async () => {
+    const { user, published } = await setup();
+    await openEmployee(user, 'Adaeze Okafor');
+    await fillRateForm(user, '2026-09-01', '100');
+    await user.click(screen.getByRole('button', { name: 'Add rate' }));
+    await waitFor(() => expect(within(rateTable()).getAllByRole('row')).toHaveLength(4));
+    published.length = 0;
+
+    await user.click(screen.getByRole('button', { name: 'Reset demo data' }));
+    expect(screen.getByText(/Your rate edits will be lost/)).toBeTruthy();
+    await user.click(screen.getByRole('button', { name: 'Yes, reset' }));
+    await waitFor(() => expect(published).toHaveLength(60));
+    expect(new Set(published.map((e) => e.employeeId)).size).toBe(60);
+
+    await openEmployee(user, 'Adaeze Okafor');
+    expect(within(rateTable()).getAllByRole('row')).toHaveLength(3); // header + the two shipped rates
+  });
+
+  it('does nothing if the confirmation is declined', async () => {
+    const { user, published } = await setup();
+    await user.click(screen.getByRole('button', { name: 'Reset demo data' }));
+    await user.click(screen.getByRole('button', { name: 'Keep my data' }));
+    expect(screen.getByRole('button', { name: 'Reset demo data' })).toBeTruthy();
+    expect(published).toEqual([]);
+  });
+});
+
+describe('bursts of events', () => {
+  it('collapses many allocation:changed events into a single re-read of the totals', async () => {
+    let reads = 0;
+    const totals: AllocationTotals = {
+      getMonthlyTotals: () => {
+        reads += 1;
+        return Promise.resolve({ status: 'ok', data: [] });
+      },
+    };
+    const { emit } = await setup({ allocationTotals: totals });
+    await waitFor(() => expect(reads).toBe(1)); // the read on mount
+    act(() => {
+      for (let i = 0; i < 50; i += 1) {
+        emit({
+          type: 'allocation:changed',
+          employeeId: `emp-${String(i + 1).padStart(3, '0')}`,
+          month: '2026-04',
+        });
+      }
+    });
+    await waitFor(() => expect(reads).toBe(2));
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    expect(reads).toBe(2);
+  });
+});

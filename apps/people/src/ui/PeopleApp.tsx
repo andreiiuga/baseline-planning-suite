@@ -27,6 +27,7 @@ export function PeopleApp({
   const [loadError, setLoadError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [confirmingReset, setConfirmingReset] = useState(false);
   const [histories, setHistories] = useState<Readonly<Record<string, readonly RateRecord[]>>>({});
 
   useEffect(() => {
@@ -68,6 +69,17 @@ export function PeopleApp({
     bus.publish({ type: 'rate:changed', employeeId });
   };
 
+  const resetDemoData = async (): Promise<void> => {
+    await repository.reset();
+    const list = await repository.listEmployees();
+    setEmployees(list);
+    setHistories({});
+    setSelectedId(null);
+    setConfirmingReset(false);
+    // Every rate may have changed back: tell Delivery, which re-reads through its port.
+    for (const employee of list) bus.publish({ type: 'rate:changed', employeeId: employee.id });
+  };
+
   if (loadError) return <p role="alert">People could not load its data: {loadError}</p>;
   if (!employees) return <p>Loading employees…</p>;
 
@@ -75,6 +87,23 @@ export function PeopleApp({
     <div className="people">
       <style>{PEOPLE_CSS}</style>
       <div>
+        <div className="reset">
+          {confirmingReset ? (
+            <>
+              <span>Restore the shipped rates? Your rate edits will be lost.</span>{' '}
+              <button type="button" onClick={() => void resetDemoData()}>
+                Yes, reset
+              </button>{' '}
+              <button type="button" onClick={() => setConfirmingReset(false)}>
+                Keep my data
+              </button>
+            </>
+          ) : (
+            <button type="button" onClick={() => setConfirmingReset(true)}>
+              Reset demo data
+            </button>
+          )}
+        </div>
         {capacity.status === 'unavailable' ? (
           <p className="notice" role="status">
             Capacity data is unavailable (Delivery is not loaded), so oversubscription is not shown.

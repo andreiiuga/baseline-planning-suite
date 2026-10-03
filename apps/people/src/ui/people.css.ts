@@ -14,5 +14,6 @@ export const PEOPLE_CSS = `
 .people .field { display: grid; gap: 0.2rem; margin-bottom: 0.6rem; max-width: 18rem; }
 .people .error { color: #b42318; margin: 0; font-size: 0.875rem; }
 .people .notice { border: 1px solid #f5c26b; background: #fffaeb; padding: 0.5rem 0.75rem; border-radius: 4px; margin-bottom: 1rem; }
+.people .reset { margin-bottom: 0.75rem; font-size: 0.875rem; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 `;

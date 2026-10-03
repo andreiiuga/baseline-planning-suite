@@ -11,6 +11,8 @@ export interface PlanActions {
    */
   readonly applyTree: (next: TreeState, removed?: readonly Allocation[]) => Promise<void>;
   readonly editCell: (cell: AllocationCell, amountPm: number) => Promise<Allocation>;
+  /** Restores the shipped data and tells People every person-month that may have changed. */
+  readonly reset: () => Promise<void>;
 }
 
 export type PlanState =
@@ -87,5 +89,13 @@ export function usePlan(
     [repository, announce],
   );
 
-  return { state, actions: { applyTree, editCell } };
+  const reset = useCallback<PlanActions['reset']>(async () => {
+    const before = state.status === 'ready' ? state.snapshot.allocations : [];
+    await repository.reset();
+    const snapshot = await repository.load();
+    setState({ status: 'ready', snapshot });
+    announce([...before, ...snapshot.allocations]);
+  }, [repository, announce, state]);
+
+  return { state, actions: { applyTree, editCell, reset } };
 }

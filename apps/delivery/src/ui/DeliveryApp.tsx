@@ -38,6 +38,7 @@ export function DeliveryApp({
   const people = usePeopleModel(employeeQuery, rateQuery, bus);
   const [projectId, setProjectId] = useState<string | null>(null);
   const [requestedUnit, setRequestedUnit] = useState<Unit>('pm');
+  const [confirmingReset, setConfirmingReset] = useState(false);
   const [windowStart, setWindowStart] = useState<YearMonth>(DEFAULT_WINDOW_START);
   const months = useMemo(
     () => monthRange(windowStart, addMonths(windowStart, WINDOW_LENGTH - 1)),
@@ -106,6 +107,26 @@ export function DeliveryApp({
             </label>
           ))}
         </fieldset>
+        <div className="field reset">
+          {confirmingReset ? (
+            <span role="group" aria-label="Confirm reset">
+              Restore the shipped plan? Your edits will be lost.{' '}
+              <button
+                type="button"
+                onClick={() => void actions.reset().then(() => setConfirmingReset(false))}
+              >
+                Yes, reset
+              </button>{' '}
+              <button type="button" onClick={() => setConfirmingReset(false)}>
+                Keep my data
+              </button>
+            </span>
+          ) : (
+            <button type="button" onClick={() => setConfirmingReset(true)}>
+              Reset demo data
+            </button>
+          )}
+        </div>
         <div className="field">
           <span id="delivery-window-label">Months</span>
           <div role="group" aria-labelledby="delivery-window-label">

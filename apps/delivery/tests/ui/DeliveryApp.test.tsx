@@ -409,3 +409,58 @@ describe('People availability and live rates', () => {
     expect(cell(personRow('001'), 0).value).toBe('8,510.40'); // 7,880 x 1.08
   });
 });
+
+describe('reset demo data', () => {
+  it('restores the shipped plan after confirmation and tells People which person-months may have changed', async () => {
+    const { user, published, repository } = await setup();
+    const input = cell(personRow('016'), 1);
+    await user.click(input);
+    await user.clear(input);
+    await user.type(input, '0.9');
+    await user.tab();
+    await waitFor(() => expect(cell(personRow('016'), 1).value).toBe('0.90'));
+    published.length = 0;
+
+    await user.click(screen.getByRole('button', { name: 'Reset demo data' }));
+    expect(screen.getByText(/Your edits will be lost/)).toBeTruthy();
+    await user.click(screen.getByRole('button', { name: 'Yes, reset' }));
+    await waitFor(() => expect(cell(personRow('016'), 1).value).toBe('0.20'));
+    expect(published.length).toBeGreaterThan(0);
+    const restored = (await repository.load()).allocations;
+    expect(restored).toHaveLength(720);
+    expect(restored.every((a) => a.seq <= 720)).toBe(true);
+  });
+
+  it('keeps everything if the confirmation is declined', async () => {
+    const { user, published } = await setup();
+    await user.click(screen.getByRole('button', { name: 'Reset demo data' }));
+    await user.click(screen.getByRole('button', { name: 'Keep my data' }));
+    expect(published).toEqual([]);
+    expect(screen.getByRole('button', { name: 'Reset demo data' })).toBeTruthy();
+  });
+});
+
+describe('bursts of events', () => {
+  it('collapses many rate:changed events into one batched read of rates', async () => {
+    const inner = createFixtureRateQuery(peopleFixture);
+    const calls: (readonly string[])[] = [];
+    const rateQuery: RateQuery = {
+      getRates: (ids) => {
+        calls.push(ids);
+        return inner.getRates(ids);
+      },
+    };
+    const { emit } = await setup({ props: { rateQuery } });
+    await waitFor(() => expect(calls).toHaveLength(1)); // the full read on mount
+    expect(calls[0]).toHaveLength(60);
+    act(() => {
+      for (let i = 1; i <= 40; i += 1) {
+        emit({ type: 'rate:changed', employeeId: `emp-${String(i).padStart(3, '0')}` });
+      }
+    });
+    await waitFor(() => expect(calls).toHaveLength(2));
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    expect(calls).toHaveLength(2);
+    expect(calls[1]).toHaveLength(40);
+  });
+});
