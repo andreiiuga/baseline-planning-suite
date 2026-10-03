@@ -11,3 +11,23 @@ const EPSILON = 1e-9;
 export function isOversubscribed(totalPm: number): boolean {
   return totalPm > CAPACITY_PM + EPSILON;
 }
+
+export interface MonthTotal {
+  readonly employeeId: string;
+  /** YYYY-MM */
+  readonly month: string;
+  readonly allocatedPM: number;
+}
+
+/** For each person, the months (sorted) in which they are allocated beyond capacity. */
+export function oversubscribedMonths(totals: readonly MonthTotal[]): Map<string, string[]> {
+  const byEmployee = new Map<string, string[]>();
+  for (const total of totals) {
+    if (!isOversubscribed(total.allocatedPM)) continue;
+    const months = byEmployee.get(total.employeeId) ?? [];
+    months.push(total.month);
+    byEmployee.set(total.employeeId, months);
+  }
+  for (const months of byEmployee.values()) months.sort();
+  return byEmployee;
+}
