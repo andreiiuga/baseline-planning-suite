@@ -1,0 +1,6 @@
+{
+  "remotes": {
+    "people": "http://localhost:8081/remoteEntry.js",
+    "delivery": "http://localhost:8082/remoteEntry.js"
+  }
+}
