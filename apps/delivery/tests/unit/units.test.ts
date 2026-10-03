@@ -124,6 +124,21 @@ describe('no rate coverage', () => {
   });
 });
 
+describe('without People data (no conversion context)', () => {
+  it('still converts person-months and percent', () => {
+    expect(unitToPm(0.5, 'pm', null)).toEqual({ ok: true, pm: 0.5 });
+    expect(unitToPm(50, 'pct', null)).toEqual({ ok: true, pm: 0.5 });
+  });
+
+  it.each(['hours', 'eur'] as const)('refuses %s instead of guessing', (unit) => {
+    expect(unitToPm(10, unit, null)).toEqual({ ok: false, reason: 'people-unavailable' });
+  });
+
+  it('still reports bad input as bad input', () => {
+    expect(unitToPm(-1, 'pm', null)).toEqual({ ok: false, reason: 'negative' });
+  });
+});
+
 describe('input validation', () => {
   const ctx = cellContext(40, month('2026-03'), schedule);
 

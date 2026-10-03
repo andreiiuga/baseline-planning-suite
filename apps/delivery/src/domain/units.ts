@@ -44,7 +44,12 @@ export function cellContext(
   };
 }
 
-export type UnitInputFailure = 'invalid-number' | 'negative' | 'no-rate-coverage';
+export type UnitInputFailure =
+  | 'invalid-number'
+  | 'negative'
+  | 'no-rate-coverage'
+  /** Hours and cost need People's data and there is none to convert with. */
+  | 'people-unavailable';
 
 export type UnitToPm =
   | { readonly ok: true; readonly pm: number }
@@ -85,9 +90,16 @@ export function pmToUnit(pm: number, unit: Unit, ctx: CellContext): number {
   return CONVERTERS[unit].fromPm(pm, ctx);
 }
 
-/** Converts something a user typed (already parsed to a number) into person-months. */
-export function unitToPm(value: number, unit: Unit, ctx: CellContext): UnitToPm {
+/**
+ * Converts something a user typed (already parsed to a number) into person-months. `ctx` is
+ * null while People's data is unavailable: person-months and percent still convert, hours
+ * and cost are refused.
+ */
+export function unitToPm(value: number, unit: Unit, ctx: CellContext | null): UnitToPm {
   if (!Number.isFinite(value)) return { ok: false, reason: 'invalid-number' };
   if (value < 0) return { ok: false, reason: 'negative' };
+  if (unit === 'pm') return ok(value);
+  if (unit === 'pct') return ok(value / 100);
+  if (ctx === null) return { ok: false, reason: 'people-unavailable' };
   return CONVERTERS[unit].toPm(value, ctx);
 }
