@@ -1,5 +1,7 @@
 # Implementation plan
 
+> **Status: complete.** Every stage below was done in order and pushed. The deviations are listed at the end of this file.
+
 Each stage ends with a **gate** (checks that must pass) and one or more **commits**. Do not start the next stage until the gate is green. Every stage leaves the repository in a working state.
 
 ## Commit rules
@@ -502,3 +504,14 @@ Stages that touch build or runtime config also run `docker compose build` and a 
 - [ ] `docker compose up` works from a clean clone
 - [ ] No `any`, no UI libraries, no leftover scaffolding
 - [ ] Commit history is readable and contains no tool or assistant references
+
+## Deviations from this plan
+
+- Tool versions are pinned to what runs on the host's Node 20.14: ESLint 9, Vitest 3, jsdom 26, TypeScript 5.9 (typescript-eslint did not support TypeScript 7).
+- Remotes are registered with `type: 'module'`, because Vite emits ES-module remote entries; `dts` generation is off.
+- Host ports are overridable (`SHELL_PORT`, `PEOPLE_PORT`, `DELIVERY_PORT`) because 8081 is commonly taken by other tools.
+- Moving a node under an allocated leaf is not the same function as adding a child: it migrates allocations only to an empty leaf and otherwise refuses (README 4.13).
+- Bursts of change events are coalesced into one re-read (found while designing reset).
+- The standalone event bus is a silent null object, not a local bus: nothing else is on it.
+- Stage 16's headline test uses Playwright through the installed Chrome (`pnpm e2e`); the resilience tests break a remote by intercepting its requests instead of stopping a container.
+- Stage 13 and 15 tests and code landed in somewhat larger commits than the commit lists above, because the register, editor and capacity state share one component.

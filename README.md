@@ -10,7 +10,7 @@ It is built as three independently built and deployed micro-frontends:
 | **people**   | Employee register, weekly hours, effective-dated cost-rate history                   | 8081 |
 | **delivery** | Projects, work breakdown tree, month-by-month staffing grid, cost and capacity views | 8082 |
 
-> **Status note:** run instructions and file paths below describe the intended layout. Verify each command against the repository as it stands and update this file if anything drifted.
+> Every command below was run from a fresh clone of this repository. The case study brief and fixtures are in `docs/`.
 
 ---
 
@@ -63,19 +63,24 @@ Host ports can be overridden with `SHELL_PORT`, `PEOPLE_PORT` and `DELIVERY_PORT
 
 The shell's entrypoint writes these into `/config.json` at container start. The URLs are never part of a bundle, so the same image can point anywhere.
 
-### Develop and test (inside containers or with local pnpm)
+### Develop and test
 
 ```bash
-pnpm install
-pnpm test                # all unit tests (Vitest)
-pnpm test:contracts      # People's real adapter against Delivery's contract suite
-pnpm lint
+pnpm install             # Node 20.14 or newer on the host; the images and CI use Node 22
 pnpm typecheck
+pnpm lint
+pnpm test                # unit, component and integration tests (Vitest)
+pnpm test:tz             # the same suite under America/Los_Angeles and Pacific/Auckland
+pnpm test:contracts      # each consumer's contract suite, run against both sides' real adapters
+pnpm seed:slices         # regenerate the per-app seed slices from docs/baseline-seed.json
+docker compose up --build -d && pnpm e2e    # Playwright against the running stack, using the installed Chrome
 ```
+
+Tool versions are pinned to what runs on Node 20.14 (ESLint 9, Vitest 3, jsdom 26, TypeScript 5.9). Property tests use a random seed locally and a fixed one when `CI` is set.
 
 ### Reset data
 
-Each app persists to its own browser database and seeds from the fixture on first use. Every app has a "Reset demo data" action. Manual alternative: DevTools, Application, IndexedDB, delete `baseline-people` or `baseline-delivery`, reload.
+Each app persists to its own browser database and seeds from its fixture slice on first use. People and Delivery each have a **Reset demo data** button (with a confirmation) that restores their own data and tells the other app to re-read. Manual alternative: DevTools, Application, IndexedDB, delete `baseline-people` or `baseline-delivery`, reload.
 
 ---
 
@@ -208,60 +213,64 @@ Each port is declared in the app that consumes it, and the provider only has to 
 ```text
 baseline-planning-suite/
 ├── apps/
-│   ├── shell/
+│   ├── shell/                        # host: navigation, currency, active user, composition
 │   │   ├── src/
-│   │   │   ├── bootstrap.ts          # fetch config.json, init MF runtime
-│   │   │   ├── compose.tsx           # composition root: build adapters, inject props
-│   │   │   ├── RemotePanel.tsx       # ErrorBoundary + Suspense + timeout per remote
-│   │   │   ├── bus/                  # event bus implementation
-│   │   │   └── chrome/               # nav, currency picker, user picker
-│   │   └── tests/resilience/         # broken remote shows fallback panel
-│   ├── people/
+│   │   │   ├── main.ts               # dynamic import, so shared modules initialise first
+│   │   │   ├── bootstrap.tsx         # fetch config.json, register remotes, load apis, render
+│   │   │   ├── config.ts             # config.json validation
+│   │   │   ├── loadApis.ts           # load each remote's api module independently, with a timeout
+│   │   │   ├── compose.ts            # composition root: turn loaded apis into ports
+│   │   │   ├── contracts.ts          # the shell's opaque view of ports and App props
+│   │   │   ├── Shell.tsx             # header, navigation, panels kept mounted once visited
+│   │   │   ├── RemotePanel.tsx       # ErrorBoundary + Suspense + timeout + Retry per remote
+│   │   │   ├── bus/eventBus.ts       # typed event bus with isolated handlers
+│   │   │   └── chrome/               # currency table, user list, localStorage preferences
+│   │   └── tests/
+│   ├── people/                       # employee register and rate history
 │   │   ├── src/
-│   │   │   ├── domain/               # rate history rules, validation (pure)
-│   │   │   ├── ports/                # AllocationTotals, EventBus
-│   │   │   ├── adapters/             # IndexedDB repositories, seed, null adapters
-│   │   │   ├── exposed/api.ts        # createEmployeeQuery, createRateQuery
-│   │   │   ├── ui/                   # register, rate history editor
-│   │   │   ├── App.tsx               # exposed as people/App
-│   │   │   └── standalone.tsx        # standalone entry, fixture adapters, local bus
-│   │   └── tests/{unit,provider}/
-│   └── delivery/
+│   │   │   ├── domain/               # rate history rules, validation, search, capacity (pure)
+│   │   │   ├── ports/                # PeopleRepository, AllocationTotals, event types
+│   │   │   ├── adapters/             # IndexedDB and in-memory repositories, fixture and null adapters, seed
+│   │   │   ├── exposed/              # api.ts (people/api): employee and rate queries other apps use
+│   │   │   ├── ui/                   # register, rate history editor, oversubscription hook
+│   │   │   ├── App.tsx               # exposed as people/App: opens storage, renders the UI
+│   │   │   └── standalone.tsx        # standalone entry: fixture adapters, silent bus
+│   │   └── tests/{unit,contracts,ui}/
+│   └── delivery/                     # breakdown tree and staffing grid
 │       ├── src/
 │       │   ├── domain/
-│       │   │   ├── dates.ts          # date-only type, working days
-│       │   │   ├── rates.ts          # slicing, coverage, blended rate
-│       │   │   ├── units.ts          # PM / hours / % / EUR conversions
-│       │   │   ├── rounding.ts       # scaled integers, largest remainder
-│       │   │   ├── rollup.ts         # parent derivation, totals
-│       │   │   ├── capacity.ts       # cross-project capacity, culprit selection
-│       │   │   └── breakdown.ts      # create, rename, move, delete, leaf-to-parent move
-│       │   ├── ports/                # RateQuery, EmployeeQuery, EventBus
-│       │   ├── adapters/             # IndexedDB repositories, seed, fixture RateQuery
-│       │   ├── exposed/api.ts        # createAllocationTotals
-│       │   ├── ui/                   # tree, staffing grid, unit switcher
+│       │   │   ├── dates.ts          # date-only types, weekday arithmetic, working days
+│       │   │   ├── rates.ts          # slicing a month by rate, coverage
+│       │   │   ├── units.ts          # person-months / hours / % / cost conversions, blended rate
+│       │   │   ├── rounding.ts       # scaled integers, largest-remainder apportionment
+│       │   │   ├── display.ts        # per-unit precision, month labels
+│       │   │   ├── rollup.ts         # parent derivation, row, column and grand totals
+│       │   │   ├── capacity.ts       # cross-project capacity and culprit selection
+│       │   │   ├── breakdown.ts      # create, rename, move, delete, allocation moves
+│       │   │   ├── staffing.ts       # the grid in a unit and currency, naming helpers
+│       │   │   └── amountInput.ts    # parsing typed amounts
+│       │   ├── ports/                # PlanRepository, RateQuery, EmployeeQuery, event types
+│       │   ├── adapters/             # IndexedDB and in-memory repositories, fixture and null adapters, seed
+│       │   ├── exposed/              # api.ts (delivery/api): allocation totals other apps use
+│       │   ├── ui/                   # tree, staffing grid and cell, data hooks
 │       │   ├── App.tsx               # exposed as delivery/App
 │       │   └── standalone.tsx
 │       └── tests/
-│           ├── unit/                 # golden reference calculation lives here
-│           └── contracts/            # runRateQueryContract(factory)
+│           ├── unit/                 # the golden reference is golden-reference.test.ts
+│           ├── contracts/            # RateQuery and EmployeeQuery contract suites (Delivery owns them)
+│           └── ui/
 ├── integration/
-│   └── contracts/                    # People's real adapter vs Delivery's contract suite
-├── scripts/
-│   └── make-seed-slices.ts           # splits baseline-seed.json into per-app slices
-├── docker/
-│   ├── Dockerfile                    # multi-stage, targets: shell | people | delivery
-│   ├── nginx.shell.conf
-│   ├── nginx.remote.conf
-│   └── entrypoint-shell.sh           # writes config.json from env
-├── docs/
-│   ├── brief.pdf
-│   └── baseline-seed.json
+│   ├── contracts/                    # each real adapter against the other app's contract suite
+│   ├── events/                       # the shell bus satisfies both apps' bus ports
+│   └── seed/                         # slice generation and drift
+├── e2e/                              # Playwright against the running stack
+├── scripts/                          # seed slicer and its invariant checks
+├── docker/                           # Dockerfile (targets shell | people | delivery), nginx configs, entrypoint
+├── docs/                             # brief.pdf, baseline-seed.json
+├── .github/workflows/ci.yml
 ├── docker-compose.yml
-├── tsconfig.base.json
-├── eslint.config.js
-├── pnpm-workspace.yaml
-├── CLAUDE.md
+├── PLAN.md                           # the staged build plan this history follows
+├── CLAUDE.md                         # project context and decisions
 └── README.md
 ```
 
@@ -288,9 +297,12 @@ Vite with `@module-federation/vite`, registering remotes at runtime through `@mo
 
 - Fast feedback loop and a current toolchain.
 - Federation behaves differently in dev and in production builds, so everything is verified against the production images that Docker serves.
-- Needs `build.target: 'esnext'` (top-level await), a correct `base` per remote, and `react` and `react-dom` declared as singletons.
+- Needs `build.target: 'esnext'` (top-level await), a relative `base` per remote (`./`, so chunks resolve against the remote's own origin and not the host page's), and `react` and `react-dom` declared as singletons.
+- Vite emits an ES-module remote entry, so remotes are registered at runtime with `type: 'module'`. Without it the runtime loads the entry as a classic script and fails with "Cannot use import statement outside a module".
+- Type generation (`dts`) is switched off: it fetches over the network at build time, and the shell declares its own view of what it loads (`remotes.d.ts`).
+- Verified in the production images: React loads once, from the shell's origin; a hosted remote requests none of its own copy.
 
-**Fallback:** Rspack with `@module-federation/enhanced` if the Vite plugin becomes a blocker. App code would barely change.
+**Fallback:** Rspack with `@module-federation/enhanced` if the Vite plugin becomes a blocker. App code would barely change. It was not needed.
 
 ### 4.3 Repository: pnpm monorepo, no shared contracts package
 
@@ -303,7 +315,8 @@ Instead, **contracts are consumer-owned**:
 - Delivery declares `RateQuery` and `EmployeeQuery` in its own `ports/`.
 - People declares `AllocationTotals` in its own `ports/`.
 - Providers satisfy them through TypeScript's structural typing, with no import in either direction.
-- A contract test suite, written once as a function over the port, runs against both the consumer's fixture adapter and the provider's real adapter.
+- A contract test suite, written once as a function over the port, runs against both the consumer's fixture adapter and the provider's real adapter. `integration/` imports from both apps to do that: it is test code, the only place the two sit side by side, and nothing shipped imports across.
+- The shell sits between them and treats every payload as `unknown` (`contracts.ts`): it forwards ports, it never reads them. The compiler therefore cannot check the shell's props against a remote's. The contract suites are what check that, which is the point of having them.
 
 **Trade-off:** small duplicated types, and the safety net only works if CI runs the contract tests. If the teams grow and want stronger compile-time guarantees, a provider-published types package is the next step.
 
@@ -315,7 +328,7 @@ Shell, People and Delivery are separate nginx containers, started by one `docker
 - Independent deploys: `docker compose up -d --build people` touches one app only.
 - A convincing failure demo: `docker compose stop people`.
 
-**Costs:** CORS headers on the remotes (origin from `ALLOWED_ORIGIN`), absolute browser-resolvable URLs in `config.json` (never docker service names), and per-remote asset base paths. The shell and its `config.json` remain the single entry point and cannot be isolated.
+**Costs:** CORS headers on the remotes (origin from `ALLOWED_ORIGIN`, which must match the shell's origin if you change `SHELL_PORT`), absolute browser-resolvable URLs in `config.json` (never docker service names), and per-remote asset base paths. The shell and its `config.json` remain the single entry point and cannot be isolated.
 
 ### 4.5 Runtime remote configuration
 
@@ -369,6 +382,8 @@ interface AllocationTotals {
 - "Unavailable" is a value, not an exception, so the UI is forced to handle it. A null-object adapter returns it when the other remote failed to load.
 - Plain functions and data cross the boundary, never class instances, to avoid hidden coupling.
 - Each remote exposes a small `api` module (no UI) separately from its `App` module. The shell loads `api` modules eagerly to wire adapters, and `App` modules lazily.
+- A port is `null` in an app's props when the app that provides it failed to load. The receiving app maps that to its own null-object adapter, so "unavailable" is decided by the consumer.
+- Storage failures inside a provider also become `unavailable`; nothing throws across the boundary.
 
 ### 4.9 Event bus
 
@@ -381,6 +396,8 @@ Two events, each defined by its publisher:
 
 Rules: events are notifications and not data transfer, handlers are idempotent, and `publish` isolates handler failures with try/catch so one broken subscriber cannot stop the others. "Give me the rate" is a port call. "A rate changed" is an event.
 
+Bursts collapse: People re-reads capacity once per burst of `allocation:changed`, and Delivery re-reads everyone named in a burst of `rate:changed` in a single batched call (a reset can touch hundreds of cells). Answers overtaken by a newer event for the same person are ignored.
+
 Currency and active user are **props**, not events, because the brief says the shell pushes them in and props give normal React re-rendering.
 
 Visited panels stay mounted (hidden) so an "open" Delivery view still receives updates, and Delivery re-reads on mount as a safety net. `BroadcastChannel` for cross-tab sync is optional.
@@ -388,7 +405,7 @@ Visited panels stay mounted (hidden) so an "open" Delivery view still receives u
 ### 4.10 Capacity and overcapacity
 
 - Capacity is 1.0 PM per person per month, summed across **all** projects directly from the store, including projects not currently open.
-- Overcapacity is flagged when `total > 1 + 1e-9`. The epsilon avoids false flags from floating-point sums of decimals. Both apps apply the same threshold, kept consistent by a contract test.
+- Overcapacity is flagged when `total > 1 + 1e-9`. The epsilon avoids false flags from floating-point sums of decimals. Both apps apply the same threshold, kept consistent by an integration test (`integration/contracts/providers.test.ts`).
 - People shows the person as oversubscribed. Delivery names the culprit: the allocation with the highest `seq` among those contributing to that person-month.
 - `seq` is a monotonic counter per allocation. Seeded rows take file order, and every amount edit bumps it. Moving an allocation does not bump it.
 - The edit is flagged, never blocked.
@@ -412,16 +429,18 @@ Totals are computed from exact values and rounded only for display. Displayed to
 - `hourlyCost` must be finite, greater than 0, with at most 2 decimals. `validFrom` must be a real calendar date.
 - Rates can be added, corrected and removed anywhere in history, retroactively. Records are always sorted by `validFrom`, and each save publishes one `rate:changed`.
 - Removing the first or only record is allowed. Affected cells then cost zero and are marked.
-- Each cell carries `coverage: 'full' | 'partial' | 'none'`. If the first rate starts mid-month, the uncovered days cost zero and the cell is marked. In `none` cells the cost input is disabled (the blended rate is zero).
+- Each cell carries `coverage: 'full' | 'partial' | 'none'`, judged on working days: a rate starting on a weekend does not make a month partial, and a slice with no working days is dropped. If the first rate starts mid-month, the uncovered days cost zero and the cell is marked. In `none` cells the cost input is disabled (the blended rate is zero).
+- The blended rate is cost over hours with zero-cost days included, so cost edits round-trip even in partially covered months.
 - Dates use a date-only type (`{ y, m, d }`) rather than `new Date('YYYY-MM-DD')` with local getters, which can shift a day depending on the time zone. Tests run under two zones.
 
 ### 4.13 Breakdown tree behaviour
 
 - Parents are derived and read-only.
-- **Adding a child under an allocated leaf moves all of the leaf's allocations onto the new child** in one transaction, with a message such as "Moved 14 allocations from X to Y". Totals before and after are equal, which is tested. Moved rows keep their `seq`.
+- **Adding a child under an allocated leaf moves all of the leaf's allocations onto the new child**, saved atomically, with a message such as "Moved 18 staffing allocations from “Design” to “Wireframes”." Totals before and after are equal, which is tested on a real level-3 leaf (`wbs-012`). Moved rows keep their `seq`.
 - Tree depth is not capped at 3. Three levels describes the fixture, and capping would make the most likely test case (a level-3 leaf with allocations) impossible.
-- Moving a node under an allocated leaf uses the same function. Moving a node under its own descendant is forbidden, and moves stay within one project.
-- Delete asks for confirmation with the number of allocations and PM affected, runs in one transaction, and publishes `allocation:changed` for every affected person-month.
+- **Moving a node under an allocated leaf** hands the leaf's allocations to the moving node only if that node is itself an empty leaf. Otherwise the move is refused with an explanation, because a parent cannot hold allocations and merging two sets of cells would be ambiguous. (An earlier note said moves reuse the add-child path unchanged; that cannot work for a moving parent.)
+- Moving a node under itself or a descendant is refused, and the move dialog never offers those targets. Moves stay within one project.
+- Delete shows how many sub-items and allocations (and person-months) go, asks for confirmation, saves atomically, and announces `allocation:changed` for every affected person-month.
 
 ### 4.14 The March 2026 reference cell
 
@@ -433,6 +452,15 @@ Totals are computed from exact values and rounded only for display. Displayed to
 - Typing a cost in another currency divides by `perEur` first, then by the blended rate.
 - People edits rates in EUR only, with converted values shown read-only, to avoid storing junk precision.
 - The active user is a header dropdown with fixed names, passed down as a prop.
+
+### 4.16 Grid editing
+
+- A person row is authoritative: its months are apportioned by largest remainder so the row total is the exact sum rounded once. Leaf, parent and footer rows are integer sums of what is shown. A shown cell can therefore differ from its own independent rounding by one last-place unit.
+- Editing converts what was typed back through the unit and display currency to person-months. **Text that is unchanged never writes**, so switching units back and forth, or retyping the value that is already shown, cannot alter a stored amount.
+- Typed text must be a plain amount (`7,880.00`, `0.5`). Blanks, signs, exponents and anything else are refused with a message instead of being guessed.
+- Over-capacity edits are saved and flagged, never blocked. The message and an "Over capacity" list name the most recently edited allocation across all projects.
+- Hours and cost need People. If it is unavailable they are disabled and the grid falls back to person-months rather than showing wrong numbers.
+- Arrow up and down move between rows in the same month column, committing on the way.
 
 ---
 
@@ -467,15 +495,17 @@ A. Okafor, 40 h/week, EUR 80/h from 2025-01-01 and EUR 95/h from 2026-03-12, one
 
 ## 6. Testing strategy
 
-| Level       | Where                           | What                                                                                                                                                |
-| ----------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unit        | `apps/*/tests/unit`             | Pure domain logic with no React: working days, slicing, conversions, rounding, rollups, capacity, breakdown rules. The golden reference lives here. |
-| Property    | `apps/delivery/tests/unit`      | `fast-check` on largest-remainder: sum identity, each cell within one unit of exact, parent identities.                                             |
-| Contract    | `apps/delivery/tests/contracts` | `runRateQueryContract(factory)` asserts what Delivery relies on (sorted by `validFrom`, unknown employee gives an empty list, date format).         |
-| Integration | `integration/contracts`         | Runs the same suite against People's real adapter. People's CI must run it before a release.                                                        |
-| Resilience  | `apps/shell/tests/resilience`   | A broken or slow remote renders the fallback panel and the rest of the shell keeps working.                                                         |
+| Level       | Where                                       | What                                                                                                                                                                                                             |
+| ----------- | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit        | `apps/*/tests/unit`                         | Pure domain logic with no React: working days, slicing, conversions, rounding, rollups, capacity, tree rules, rate history. The golden reference is `golden-reference.test.ts`.                                  |
+| Property    | `apps/delivery/tests/unit/rounding.test.ts` | `fast-check` on largest-remainder: sum identity, each cell within one unit of exact, total is the exact sum rounded once.                                                                                        |
+| Reconcile   | `apps/delivery/tests/unit/rollup.test.ts`   | Every row, column and total adds up across the whole seed, in every unit, for every project.                                                                                                                     |
+| Contract    | `apps/*/tests/contracts`                    | The consumer-owned suites: `RateQuery` and `EmployeeQuery` (Delivery), `AllocationTotals` (People). They pin behaviour, including that `validFrom` is inclusive and the last rate open.                          |
+| Integration | `integration/`                              | Each provider's real adapter, over real IndexedDB storage, runs against the other app's contract suite; the shell bus fits both bus ports; both apps share the capacity threshold; seed slices have not drifted. |
+| Component   | `apps/*/tests/ui`                           | React Testing Library: register search, rate editing and validation, tree operations and keyboard, grid editing in every unit, over-capacity, People unavailable, live rate changes.                             |
+| End to end  | `e2e/` (`pnpm e2e`)                         | Playwright against the compose stack: the headline live update, cross-app oversubscription, persistence, a remote failing, a broken `config.json`, standalone mode.                                              |
 
-Date logic is also run under `TZ=America/Los_Angeles` and `TZ=Pacific/Auckland`.
+Date logic is also run under `TZ=America/Los_Angeles` and `TZ=Pacific/Auckland` (`pnpm test:tz`, and in CI). The break tests were exercised for real: renaming a field in People's published rates fails five contract tests.
 
 ---
 
@@ -483,10 +513,38 @@ Date logic is also run under `TZ=America/Los_Angeles` and `TZ=Pacific/Auckland`.
 
 - IndexedDB ownership between hosted remotes is convention plus lint, not browser-enforced (see 4.6).
 - Hosted and standalone modes use separate datasets because they run on different origins.
-- FX rates are static and illustrative.
+- FX rates are static and illustrative (EUR 1, USD 1.08, GBP 0.85 per EUR).
 - Seed allocations rank for "most recently edited" in file order.
-- Moves in the breakdown tree stay within one project.
-- Contract tests only protect against drift if CI runs them on both sides.
-- The shell and `config.json` are the single entry point and cannot be isolated.
+- Contract tests only protect against drift if CI runs them on both sides. The shell's types for what it forwards are opaque, so the compiler cannot check a remote's props.
+- A refused connection fails a remote immediately; the 5 s timeout path is covered by a unit test rather than an end-to-end one.
+- The staffing grid renders every row (no virtualisation). Building a project's whole grid measures about 0.2 ms, and typing stays in per-cell state.
+- The tree and grid are not a full ARIA treegrid: tree arrows and grid up/down are implemented, other keys are not.
+- Numbers are parsed with `.` as the decimal separator and `,` as thousands separator only.
+- Port 8081 is also used by other tools (Metro, for one). Override with `PEOPLE_PORT` and `PEOPLE_REMOTE_URL`; the end-to-end suite honours `PEOPLE_PORT`.
+- The staffing "added by" stamp using the active user was considered and not built.
 
 Not in scope, per the brief: visual polish, a design system, authentication, mobile, offline support and scheduling.
+
+---
+
+## 8. Where to change what
+
+Small changes a reviewer is likely to ask for, and the files they touch:
+
+| Change                                    | Where                                                                                                                                                                                                                              | Files  |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| Add a display currency                    | `apps/shell/src/chrome/currency.ts` (the table). Both apps receive it as a prop.                                                                                                                                                   | 1      |
+| Show another field in the People register | `apps/people/src/ui/EmployeeRegister.tsx` (and the `Employee` type if the field is new)                                                                                                                                            | 1 to 2 |
+| Change the over-capacity threshold        | `apps/delivery/src/domain/capacity.ts` and `apps/people/src/domain/capacity.ts`. Each app owns its copy on purpose; the integration test fails if they disagree.                                                                   | 2      |
+| Change rounding precision for a unit      | `apps/delivery/src/domain/display.ts`                                                                                                                                                                                              | 1      |
+| Change which days count as working days   | `apps/delivery/src/domain/dates.ts`                                                                                                                                                                                                | 1      |
+| Add a unit to the grid                    | `units.ts` (converter), `display.ts` (precision), `staffing.ts` and `ui/StaffingGrid.tsx` (the places that special-case units), `ui/DeliveryApp.tsx` (label). The exhaustive `Record<Unit, …>` tables make the compiler list them. | 5      |
+
+## 9. What I would do next
+
+- A real backend with authentication, and the same ports in front of it. Only adapters change.
+- Real storage isolation for hosted remotes (separate origins or iframes), at the cost of the shared page.
+- Provider-published types so a remote's props and ports can be checked at compile time across the boundary.
+- Cross-tab sync through `BroadcastChannel` on the bus.
+- A virtualised grid, full ARIA treegrid keyboard support, and locale-aware number entry.
+- Undo for allocation edits, and an "edited by" stamp using the active user.
