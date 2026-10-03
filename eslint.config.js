@@ -10,4 +10,31 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'error',
     },
   },
+  {
+    // One owner per piece of data: only an app's adapters may open its database.
+    files: ['apps/*/src/**/*.{ts,tsx}'],
+    ignores: ['apps/*/src/adapters/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            { name: 'idb', message: "Open databases only inside the app's adapters/ folder." },
+          ],
+        },
+      ],
+      'no-restricted-globals': [
+        'error',
+        { name: 'indexedDB', message: "Open databases only inside the app's adapters/ folder." },
+      ],
+      'no-restricted-properties': [
+        'error',
+        {
+          object: 'window',
+          property: 'indexedDB',
+          message: "Open databases only inside the app's adapters/ folder.",
+        },
+      ],
+    },
+  },
 );
