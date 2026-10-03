@@ -28,8 +28,8 @@ export interface CapacityIndex {
 
 const keyOf = (employeeId: string, month: string): string => `${employeeId}|${month}`;
 
-/** Allocations for all projects, not only the one on screen. */
-export function buildCapacityIndex(allocations: readonly Allocation[]): CapacityIndex {
+/** One entry per person-month that has at least one allocation. All projects together. */
+export function monthlyLoads(allocations: readonly Allocation[]): PersonMonthLoad[] {
   const groups = new Map<string, Allocation[]>();
   for (const allocation of allocations) {
     const key = keyOf(allocation.employeeId, allocation.month);
@@ -38,15 +38,15 @@ export function buildCapacityIndex(allocations: readonly Allocation[]): Capacity
     else groups.set(key, [allocation]);
   }
 
-  const loads = new Map<string, PersonMonthLoad>();
-  for (const [key, group] of groups) {
+  const loads: PersonMonthLoad[] = [];
+  for (const group of groups.values()) {
     const [first] = group;
     if (!first) continue;
     const totalPm = group.reduce((sum, a) => sum + a.amount, 0);
     const culprit = group
       .filter((a) => a.amount > 0)
       .reduce<Allocation | null>((latest, a) => (!latest || a.seq > latest.seq ? a : latest), null);
-    loads.set(key, {
+    loads.push({
       employeeId: first.employeeId,
       month: first.month,
       totalPm,
@@ -54,7 +54,14 @@ export function buildCapacityIndex(allocations: readonly Allocation[]): Capacity
       culprit,
     });
   }
+  return loads;
+}
 
+/** Allocations for all projects, not only the one on screen. */
+export function buildCapacityIndex(allocations: readonly Allocation[]): CapacityIndex {
+  const loads = new Map(
+    monthlyLoads(allocations).map((load) => [keyOf(load.employeeId, load.month), load]),
+  );
   return {
     get: (employeeId, month) => loads.get(keyOf(employeeId, month)),
     overCapacity: () => [...loads.values()].filter((load) => load.over),
