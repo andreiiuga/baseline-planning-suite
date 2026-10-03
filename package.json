@@ -14,7 +14,7 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:tz": "TZ=America/Los_Angeles vitest run && TZ=Pacific/Auckland vitest run",
-    "test:contracts": "echo \"no contract suites yet\"",
+    "test:contracts": "vitest run integration apps/delivery/tests/contracts apps/people/tests/contracts",
     "seed:slices": "tsx scripts/make-seed-slices.ts"
   },
   "devDependencies": {

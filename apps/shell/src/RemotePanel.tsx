@@ -14,12 +14,12 @@ import { withTimeout } from './timeout';
 
 const LOAD_TIMEOUT_MS = 5000;
 
-interface RemoteModule {
-  readonly default: ComponentType;
+interface RemoteModule<P> {
+  readonly default: ComponentType<P>;
 }
 
-function loadApp(name: RemoteName): Promise<RemoteModule> {
-  const load = loadRemote<RemoteModule>(`${name}/App`);
+function loadApp<P extends object>(name: RemoteName): Promise<RemoteModule<P>> {
+  const load = loadRemote<RemoteModule<P>>(`${name}/App`);
   return withTimeout(load, LOAD_TIMEOUT_MS, name).then((module) => {
     if (!module) throw new Error(`${name}/App resolved to nothing`);
     return module;
@@ -62,15 +62,22 @@ class RemoteErrorBoundary extends Component<BoundaryProps, BoundaryState> {
   }
 }
 
-export function RemotePanel({ name }: { readonly name: RemoteName }) {
+export function RemotePanel<P extends object>({
+  name,
+  appProps,
+}: {
+  readonly name: RemoteName;
+  /** Injected into the remote's App: ports, bus, currency, active user. */
+  readonly appProps: P;
+}) {
   const [attempt, setAttempt] = useState(0);
   // A new lazy component per attempt so Retry actually reloads the remote.
-  const Remote = useMemo(() => lazy(() => loadApp(name)), [name, attempt]);
+  const Remote = useMemo(() => lazy(() => loadApp<P>(name)), [name, attempt]);
 
   return (
     <RemoteErrorBoundary key={attempt} name={name} onRetry={() => setAttempt((n) => n + 1)}>
       <Suspense fallback={<p>Loading {name}…</p>}>
-        <Remote />
+        <Remote {...appProps} />
       </Suspense>
     </RemoteErrorBoundary>
   );

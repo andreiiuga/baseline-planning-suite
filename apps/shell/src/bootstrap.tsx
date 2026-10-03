@@ -1,7 +1,10 @@
 import { registerRemotes } from '@module-federation/runtime';
 import { createRoot } from 'react-dom/client';
+import { composePorts } from './compose';
 import { loadConfig, REMOTE_NAMES } from './config';
-import { RemotePanel } from './RemotePanel';
+import { loadApis } from './loadApis';
+import { Shell } from './Shell';
+import './shell.css';
 
 function Fatal({ reason }: { readonly reason: string }) {
   return (
@@ -28,14 +31,10 @@ async function start(): Promise<void> {
     { force: true },
   );
 
-  root.render(
-    <main>
-      <h1>Baseline Planning Suite</h1>
-      {REMOTE_NAMES.map((name) => (
-        <RemotePanel key={name} name={name} />
-      ))}
-    </main>,
-  );
+  // Composition root: load both api modules, wire ports once, then render. A remote that
+  // fails to load yields a null port, never an exception.
+  const { people, delivery } = await loadApis();
+  root.render(<Shell ports={composePorts(people, delivery)} />);
 }
 
 void start();
