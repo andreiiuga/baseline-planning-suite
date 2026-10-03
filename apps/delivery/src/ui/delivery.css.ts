@@ -17,6 +17,7 @@ export const DELIVERY_CSS = `
 .delivery .tree-tools { margin-top: 1rem; display: grid; gap: 0.5rem; }
 .delivery .tree-tools .actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 .delivery .confirm { border: 1px solid #fda29b; background: #fef3f2; padding: 0.5rem 0.75rem; border-radius: 4px; }
+.delivery .layout > * { min-width: 0; }
 .delivery .grid-scroll { overflow-x: auto; }
 .delivery .staffing table { border-collapse: collapse; width: 100%; min-width: 60rem; }
 .delivery .staffing th, .delivery .staffing td { padding: 0.2rem 0.4rem; border-bottom: 1px solid #e2e7ee; text-align: left; white-space: nowrap; }
@@ -25,7 +26,7 @@ export const DELIVERY_CSS = `
 .delivery .staffing tr[data-kind='leaf'] th, .delivery .staffing tr[data-kind='leaf'] td { background: #f9fafc; }
 .delivery .staffing .tag { font-size: 0.65rem; color: #5b6674; text-transform: uppercase; margin-left: 0.25rem; }
 .delivery .staffing .cell { position: relative; }
-.delivery .staffing .cell input { width: 4.6rem; text-align: right; font: inherit; padding: 0.15rem 0.25rem; border: 1px solid #cfd6e0; border-radius: 3px; }
+.delivery .staffing .cell input { width: 6.2rem; text-align: right; font: inherit; padding: 0.15rem 0.25rem; border: 1px solid #cfd6e0; border-radius: 3px; }
 .delivery .staffing .cell input:focus { outline: 2px solid #2f6fd0; }
 .delivery .staffing .cell input:disabled { background: #f0f2f5; color: #6b7684; }
 .delivery .staffing .cell[data-over] input { border-color: #b42318; background: #fef3f2; }

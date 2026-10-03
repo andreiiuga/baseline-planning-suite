@@ -200,6 +200,14 @@ export function StaffingGrid({
   return (
     <section aria-labelledby={`${captionId}-title`} className="staffing">
       <h2 id={`${captionId}-title`}>Staffing</h2>
+      {message ? (
+        <p role={message.kind === 'error' ? 'alert' : 'status'} className={message.kind}>
+          {message.text}
+        </p>
+      ) : (
+        <p role="status" className="visually-hidden" />
+      )}
+
       <div className="grid-scroll">
         <table>
           <caption className="visually-hidden">
@@ -337,14 +345,6 @@ export function StaffingGrid({
           </tfoot>
         </table>
       </div>
-
-      {message ? (
-        <p role={message.kind === 'error' ? 'alert' : 'status'} className={message.kind}>
-          {message.text}
-        </p>
-      ) : (
-        <p role="status" className="visually-hidden" />
-      )}
 
       {overInView.length > 0 ? (
         <section aria-label="Over capacity" className="over-list">
