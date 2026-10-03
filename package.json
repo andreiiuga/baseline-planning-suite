@@ -8,20 +8,23 @@
     "node": ">=20"
   },
   "scripts": {
-    "typecheck": "pnpm -r --workspace-concurrency=1 typecheck",
+    "typecheck": "pnpm -r --workspace-concurrency=1 typecheck && tsc -p tsconfig.json",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:tz": "TZ=America/Los_Angeles vitest run && TZ=Pacific/Auckland vitest run",
-    "test:contracts": "echo \"no contract suites yet\""
+    "test:contracts": "echo \"no contract suites yet\"",
+    "seed:slices": "tsx scripts/make-seed-slices.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
     "@types/node": "^26.6.4",
     "eslint": "^9.39.5",
+    "fake-indexeddb": "^6.2.5",
     "fast-check": "^4.10.2",
     "prettier": "^3.9.9",
+    "tsx": "^4.23.15",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.71.0",
     "vitest": "^3.2.7"

@@ -1,0 +1,1267 @@
+{
+  "seedVersion": 1,
+  "employees": [
+    {
+      "id": "emp-001",
+      "name": "Adaeze Okafor",
+      "role": "Tech Lead",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-002",
+      "name": "Lena Okafor",
+      "role": "Frontend Engineer",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-003",
+      "name": "Milan Brandt",
+      "role": "Backend Engineer",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-004",
+      "name": "Samira Haddad",
+      "role": "Frontend Engineer",
+      "weeklyHours": 32
+    },
+    {
+      "id": "emp-005",
+      "name": "Tomas Novak",
+      "role": "Frontend Engineer",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-006",
+      "name": "Ines Ferreira",
+      "role": "Tech Lead",
+      "weeklyHours": 32
+    },
+    {
+      "id": "emp-007",
+      "name": "Jonas Weiss",
+      "role": "Tech Lead",
+      "weeklyHours": 32
+    },
+    {
+      "id": "emp-008",
+      "name": "Priya Nair",
+      "role": "Platform Engineer",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-009",
+      "name": "Mateo Duarte",
+      "role": "Data Engineer",
+      "weeklyHours": 32
+    },
+    {
+      "id": "emp-010",
+      "name": "Nora Lindqvist",
+      "role": "QA Engineer",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-011",
+      "name": "Kwame Mensah",
+      "role": "QA Engineer",
+      "weeklyHours": 32
+    },
+    {
+      "id": "emp-012",
+      "name": "Elif Demir",
+      "role": "Product Designer",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-013",
+      "name": "Lukas Fischer",
+      "role": "Delivery Manager",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-014",
+      "name": "Farida Belkacem",
+      "role": "QA Engineer",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-015",
+      "name": "Sven Ahlberg",
+      "role": "QA Engineer",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-016",
+      "name": "Anja Keller",
+      "role": "Product Designer",
+      "weeklyHours": 32
+    },
+    {
+      "id": "emp-017",
+      "name": "Dimitri Petrov",
+      "role": "Frontend Engineer",
+      "weeklyHours": 32
+    },
+    {
+      "id": "emp-018",
+      "name": "Yara Saleh",
+      "role": "Product Designer",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-019",
+      "name": "Bastian Vogel",
+      "role": "Platform Engineer",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-020",
+      "name": "Chiara Rossi",
+      "role": "Frontend Engineer",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-021",
+      "name": "Oskar Lindgren",
+      "role": "Backend Engineer",
+      "weeklyHours": 32
+    },
+    {
+      "id": "emp-022",
+      "name": "Amira Chalabi",
+      "role": "Platform Engineer",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-023",
+      "name": "Henrik Bauer",
+      "role": "QA Engineer",
+      "weeklyHours": 20
+    },
+    {
+      "id": "emp-024",
+      "name": "Teodora Ilic",
+      "role": "Frontend Engineer",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-025",
+      "name": "Rafael Moreno",
+      "role": "QA Engineer",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-026",
+      "name": "Lise Dubois",
+      "role": "Tech Lead",
+      "weeklyHours": 32
+    },
+    {
+      "id": "emp-027",
+      "name": "Nikolai Sokolov",
+      "role": "Data Engineer",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-028",
+      "name": "Zeynep Yilmaz",
+      "role": "Backend Engineer",
+      "weeklyHours": 32
+    },
+    {
+      "id": "emp-029",
+      "name": "Emil Nyberg",
+      "role": "Tech Lead",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-030",
+      "name": "Paula Santos",
+      "role": "Frontend Engineer",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-031",
+      "name": "Ravi Krishnan",
+      "role": "Data Engineer",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-032",
+      "name": "Hanna Virtanen",
+      "role": "Data Engineer",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-033",
+      "name": "Marek Kowalski",
+      "role": "Data Engineer",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-034",
+      "name": "Sofia Marchetti",
+      "role": "Platform Engineer",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-035",
+      "name": "Bjorn Halvorsen",
+      "role": "Frontend Engineer",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-036",
+      "name": "Leila Mansour",
+      "role": "Tech Lead",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-037",
+      "name": "Andres Gutierrez",
+      "role": "Product Designer",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-038",
+      "name": "Katrin Hofer",
+      "role": "Platform Engineer",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-039",
+      "name": "Tobias Reinhardt",
+      "role": "Delivery Manager",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-040",
+      "name": "Nadia Kaddour",
+      "role": "Backend Engineer",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-041",
+      "name": "Viktor Melnyk",
+      "role": "Data Engineer",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-042",
+      "name": "Ingrid Solberg",
+      "role": "QA Engineer",
+      "weeklyHours": 32
+    },
+    {
+      "id": "emp-043",
+      "name": "Omar Farouk",
+      "role": "Frontend Engineer",
+      "weeklyHours": 32
+    },
+    {
+      "id": "emp-044",
+      "name": "Clara Bergmann",
+      "role": "QA Engineer",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-045",
+      "name": "Josef Novotny",
+      "role": "Data Engineer",
+      "weeklyHours": 32
+    },
+    {
+      "id": "emp-046",
+      "name": "Rania Aziz",
+      "role": "Frontend Engineer",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-047",
+      "name": "Stefan Lang",
+      "role": "Delivery Manager",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-048",
+      "name": "Maja Jankovic",
+      "role": "Platform Engineer",
+      "weeklyHours": 20
+    },
+    {
+      "id": "emp-049",
+      "name": "Aleks Popovic",
+      "role": "QA Engineer",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-050",
+      "name": "Julia Wagner",
+      "role": "Backend Engineer",
+      "weeklyHours": 32
+    },
+    {
+      "id": "emp-051",
+      "name": "Pieter de Vries",
+      "role": "Delivery Manager",
+      "weeklyHours": 32
+    },
+    {
+      "id": "emp-052",
+      "name": "Noor Rahimi",
+      "role": "Backend Engineer",
+      "weeklyHours": 32
+    },
+    {
+      "id": "emp-053",
+      "name": "Gustav Ahlgren",
+      "role": "Product Designer",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-054",
+      "name": "Marta Zielinska",
+      "role": "Delivery Manager",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-055",
+      "name": "Ismail Toprak",
+      "role": "Tech Lead",
+      "weeklyHours": 32
+    },
+    {
+      "id": "emp-056",
+      "name": "Freya Dahl",
+      "role": "Delivery Manager",
+      "weeklyHours": 20
+    },
+    {
+      "id": "emp-057",
+      "name": "Daniel Schuster",
+      "role": "Tech Lead",
+      "weeklyHours": 40
+    },
+    {
+      "id": "emp-058",
+      "name": "Alina Moroz",
+      "role": "Data Engineer",
+      "weeklyHours": 32
+    },
+    {
+      "id": "emp-059",
+      "name": "Hugo Almeida",
+      "role": "QA Engineer",
+      "weeklyHours": 32
+    },
+    {
+      "id": "emp-060",
+      "name": "Sara Lindholm",
+      "role": "Delivery Manager",
+      "weeklyHours": 40
+    }
+  ],
+  "rateRecords": [
+    {
+      "id": "rate-001",
+      "employeeId": "emp-001",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 80
+    },
+    {
+      "id": "rate-002",
+      "employeeId": "emp-001",
+      "validFrom": "2026-03-12",
+      "hourlyCost": 95
+    },
+    {
+      "id": "rate-003",
+      "employeeId": "emp-002",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 85
+    },
+    {
+      "id": "rate-004",
+      "employeeId": "emp-003",
+      "validFrom": "2024-07-01",
+      "hourlyCost": 100
+    },
+    {
+      "id": "rate-005",
+      "employeeId": "emp-004",
+      "validFrom": "2024-07-01",
+      "hourlyCost": 91
+    },
+    {
+      "id": "rate-006",
+      "employeeId": "emp-004",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 99
+    },
+    {
+      "id": "rate-007",
+      "employeeId": "emp-004",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 106
+    },
+    {
+      "id": "rate-008",
+      "employeeId": "emp-005",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 97
+    },
+    {
+      "id": "rate-009",
+      "employeeId": "emp-005",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 100
+    },
+    {
+      "id": "rate-010",
+      "employeeId": "emp-005",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 106
+    },
+    {
+      "id": "rate-011",
+      "employeeId": "emp-006",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 108
+    },
+    {
+      "id": "rate-012",
+      "employeeId": "emp-006",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 113
+    },
+    {
+      "id": "rate-013",
+      "employeeId": "emp-006",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 116
+    },
+    {
+      "id": "rate-014",
+      "employeeId": "emp-007",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 113
+    },
+    {
+      "id": "rate-015",
+      "employeeId": "emp-007",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 125
+    },
+    {
+      "id": "rate-016",
+      "employeeId": "emp-007",
+      "validFrom": "2026-05-14",
+      "hourlyCost": 122
+    },
+    {
+      "id": "rate-017",
+      "employeeId": "emp-008",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 103
+    },
+    {
+      "id": "rate-018",
+      "employeeId": "emp-009",
+      "validFrom": "2024-07-01",
+      "hourlyCost": 83
+    },
+    {
+      "id": "rate-019",
+      "employeeId": "emp-009",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 90
+    },
+    {
+      "id": "rate-020",
+      "employeeId": "emp-009",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 94
+    },
+    {
+      "id": "rate-021",
+      "employeeId": "emp-009",
+      "validFrom": "2026-08-01",
+      "hourlyCost": 99
+    },
+    {
+      "id": "rate-022",
+      "employeeId": "emp-010",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 70
+    },
+    {
+      "id": "rate-023",
+      "employeeId": "emp-010",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 79
+    },
+    {
+      "id": "rate-024",
+      "employeeId": "emp-010",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 87
+    },
+    {
+      "id": "rate-025",
+      "employeeId": "emp-010",
+      "validFrom": "2026-08-01",
+      "hourlyCost": 93
+    },
+    {
+      "id": "rate-026",
+      "employeeId": "emp-011",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 74
+    },
+    {
+      "id": "rate-027",
+      "employeeId": "emp-011",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 80
+    },
+    {
+      "id": "rate-028",
+      "employeeId": "emp-011",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 85
+    },
+    {
+      "id": "rate-029",
+      "employeeId": "emp-012",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 73
+    },
+    {
+      "id": "rate-030",
+      "employeeId": "emp-012",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 79
+    },
+    {
+      "id": "rate-031",
+      "employeeId": "emp-012",
+      "validFrom": "2026-06-11",
+      "hourlyCost": 76
+    },
+    {
+      "id": "rate-032",
+      "employeeId": "emp-013",
+      "validFrom": "2024-07-01",
+      "hourlyCost": 89
+    },
+    {
+      "id": "rate-033",
+      "employeeId": "emp-013",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 98
+    },
+    {
+      "id": "rate-034",
+      "employeeId": "emp-014",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 81
+    },
+    {
+      "id": "rate-035",
+      "employeeId": "emp-014",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 88
+    },
+    {
+      "id": "rate-036",
+      "employeeId": "emp-015",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 77
+    },
+    {
+      "id": "rate-037",
+      "employeeId": "emp-015",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 82
+    },
+    {
+      "id": "rate-038",
+      "employeeId": "emp-016",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 76
+    },
+    {
+      "id": "rate-039",
+      "employeeId": "emp-016",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 85
+    },
+    {
+      "id": "rate-040",
+      "employeeId": "emp-016",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 91
+    },
+    {
+      "id": "rate-041",
+      "employeeId": "emp-017",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 81
+    },
+    {
+      "id": "rate-042",
+      "employeeId": "emp-017",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 89
+    },
+    {
+      "id": "rate-043",
+      "employeeId": "emp-017",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 96
+    },
+    {
+      "id": "rate-044",
+      "employeeId": "emp-017",
+      "validFrom": "2026-08-01",
+      "hourlyCost": 100
+    },
+    {
+      "id": "rate-045",
+      "employeeId": "emp-018",
+      "validFrom": "2024-07-01",
+      "hourlyCost": 74
+    },
+    {
+      "id": "rate-046",
+      "employeeId": "emp-019",
+      "validFrom": "2024-07-01",
+      "hourlyCost": 90
+    },
+    {
+      "id": "rate-047",
+      "employeeId": "emp-019",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 100
+    },
+    {
+      "id": "rate-048",
+      "employeeId": "emp-019",
+      "validFrom": "2026-07-16",
+      "hourlyCost": 94
+    },
+    {
+      "id": "rate-049",
+      "employeeId": "emp-020",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 96
+    },
+    {
+      "id": "rate-050",
+      "employeeId": "emp-021",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 93
+    },
+    {
+      "id": "rate-051",
+      "employeeId": "emp-021",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 96
+    },
+    {
+      "id": "rate-052",
+      "employeeId": "emp-021",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 102
+    },
+    {
+      "id": "rate-053",
+      "employeeId": "emp-022",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 107
+    },
+    {
+      "id": "rate-054",
+      "employeeId": "emp-022",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 111
+    },
+    {
+      "id": "rate-055",
+      "employeeId": "emp-022",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 114
+    },
+    {
+      "id": "rate-056",
+      "employeeId": "emp-023",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 76
+    },
+    {
+      "id": "rate-057",
+      "employeeId": "emp-023",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 88
+    },
+    {
+      "id": "rate-058",
+      "employeeId": "emp-023",
+      "validFrom": "2026-09-10",
+      "hourlyCost": 81
+    },
+    {
+      "id": "rate-059",
+      "employeeId": "emp-024",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 90
+    },
+    {
+      "id": "rate-060",
+      "employeeId": "emp-025",
+      "validFrom": "2024-07-01",
+      "hourlyCost": 68
+    },
+    {
+      "id": "rate-061",
+      "employeeId": "emp-025",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 73
+    },
+    {
+      "id": "rate-062",
+      "employeeId": "emp-025",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 77
+    },
+    {
+      "id": "rate-063",
+      "employeeId": "emp-026",
+      "validFrom": "2024-07-01",
+      "hourlyCost": 112
+    },
+    {
+      "id": "rate-064",
+      "employeeId": "emp-026",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 117
+    },
+    {
+      "id": "rate-065",
+      "employeeId": "emp-027",
+      "validFrom": "2024-07-01",
+      "hourlyCost": 96
+    },
+    {
+      "id": "rate-066",
+      "employeeId": "emp-027",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 102
+    },
+    {
+      "id": "rate-067",
+      "employeeId": "emp-027",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 105
+    },
+    {
+      "id": "rate-068",
+      "employeeId": "emp-027",
+      "validFrom": "2026-08-01",
+      "hourlyCost": 112
+    },
+    {
+      "id": "rate-069",
+      "employeeId": "emp-028",
+      "validFrom": "2024-07-01",
+      "hourlyCost": 90
+    },
+    {
+      "id": "rate-070",
+      "employeeId": "emp-028",
+      "validFrom": "2026-10-15",
+      "hourlyCost": 96
+    },
+    {
+      "id": "rate-071",
+      "employeeId": "emp-029",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 113
+    },
+    {
+      "id": "rate-072",
+      "employeeId": "emp-029",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 122
+    },
+    {
+      "id": "rate-073",
+      "employeeId": "emp-029",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 125
+    },
+    {
+      "id": "rate-074",
+      "employeeId": "emp-030",
+      "validFrom": "2024-07-01",
+      "hourlyCost": 90
+    },
+    {
+      "id": "rate-075",
+      "employeeId": "emp-030",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 97
+    },
+    {
+      "id": "rate-076",
+      "employeeId": "emp-031",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 96
+    },
+    {
+      "id": "rate-077",
+      "employeeId": "emp-031",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 99
+    },
+    {
+      "id": "rate-078",
+      "employeeId": "emp-031",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 104
+    },
+    {
+      "id": "rate-079",
+      "employeeId": "emp-032",
+      "validFrom": "2024-07-01",
+      "hourlyCost": 86
+    },
+    {
+      "id": "rate-080",
+      "employeeId": "emp-032",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 92
+    },
+    {
+      "id": "rate-081",
+      "employeeId": "emp-033",
+      "validFrom": "2024-07-01",
+      "hourlyCost": 90
+    },
+    {
+      "id": "rate-082",
+      "employeeId": "emp-033",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 94
+    },
+    {
+      "id": "rate-083",
+      "employeeId": "emp-034",
+      "validFrom": "2024-07-01",
+      "hourlyCost": 92
+    },
+    {
+      "id": "rate-084",
+      "employeeId": "emp-034",
+      "validFrom": "2026-11-12",
+      "hourlyCost": 95
+    },
+    {
+      "id": "rate-085",
+      "employeeId": "emp-035",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 81
+    },
+    {
+      "id": "rate-086",
+      "employeeId": "emp-035",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 88
+    },
+    {
+      "id": "rate-087",
+      "employeeId": "emp-036",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 114
+    },
+    {
+      "id": "rate-088",
+      "employeeId": "emp-036",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 118
+    },
+    {
+      "id": "rate-089",
+      "employeeId": "emp-036",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 125
+    },
+    {
+      "id": "rate-090",
+      "employeeId": "emp-037",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 71
+    },
+    {
+      "id": "rate-091",
+      "employeeId": "emp-037",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 79
+    },
+    {
+      "id": "rate-092",
+      "employeeId": "emp-037",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 82
+    },
+    {
+      "id": "rate-093",
+      "employeeId": "emp-038",
+      "validFrom": "2024-07-01",
+      "hourlyCost": 104
+    },
+    {
+      "id": "rate-094",
+      "employeeId": "emp-038",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 110
+    },
+    {
+      "id": "rate-095",
+      "employeeId": "emp-038",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 117
+    },
+    {
+      "id": "rate-096",
+      "employeeId": "emp-038",
+      "validFrom": "2026-08-01",
+      "hourlyCost": 122
+    },
+    {
+      "id": "rate-097",
+      "employeeId": "emp-039",
+      "validFrom": "2024-07-01",
+      "hourlyCost": 83
+    },
+    {
+      "id": "rate-098",
+      "employeeId": "emp-039",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 86
+    },
+    {
+      "id": "rate-099",
+      "employeeId": "emp-039",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 91
+    },
+    {
+      "id": "rate-100",
+      "employeeId": "emp-039",
+      "validFrom": "2026-08-01",
+      "hourlyCost": 96
+    },
+    {
+      "id": "rate-101",
+      "employeeId": "emp-040",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 89
+    },
+    {
+      "id": "rate-102",
+      "employeeId": "emp-041",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 93
+    },
+    {
+      "id": "rate-103",
+      "employeeId": "emp-041",
+      "validFrom": "2027-01-13",
+      "hourlyCost": 97
+    },
+    {
+      "id": "rate-104",
+      "employeeId": "emp-042",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 70
+    },
+    {
+      "id": "rate-105",
+      "employeeId": "emp-042",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 73
+    },
+    {
+      "id": "rate-106",
+      "employeeId": "emp-042",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 81
+    },
+    {
+      "id": "rate-107",
+      "employeeId": "emp-043",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 94
+    },
+    {
+      "id": "rate-108",
+      "employeeId": "emp-044",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 67
+    },
+    {
+      "id": "rate-109",
+      "employeeId": "emp-045",
+      "validFrom": "2024-07-01",
+      "hourlyCost": 99
+    },
+    {
+      "id": "rate-110",
+      "employeeId": "emp-045",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 106
+    },
+    {
+      "id": "rate-111",
+      "employeeId": "emp-045",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 112
+    },
+    {
+      "id": "rate-112",
+      "employeeId": "emp-046",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 91
+    },
+    {
+      "id": "rate-113",
+      "employeeId": "emp-046",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 95
+    },
+    {
+      "id": "rate-114",
+      "employeeId": "emp-047",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 84
+    },
+    {
+      "id": "rate-115",
+      "employeeId": "emp-047",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 93
+    },
+    {
+      "id": "rate-116",
+      "employeeId": "emp-047",
+      "validFrom": "2026-08-01",
+      "hourlyCost": 97
+    },
+    {
+      "id": "rate-117",
+      "employeeId": "emp-047",
+      "validFrom": "2027-02-11",
+      "hourlyCost": 89
+    },
+    {
+      "id": "rate-118",
+      "employeeId": "emp-048",
+      "validFrom": "2024-07-01",
+      "hourlyCost": 91
+    },
+    {
+      "id": "rate-119",
+      "employeeId": "emp-048",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 96
+    },
+    {
+      "id": "rate-120",
+      "employeeId": "emp-049",
+      "validFrom": "2024-07-01",
+      "hourlyCost": 70
+    },
+    {
+      "id": "rate-121",
+      "employeeId": "emp-049",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 73
+    },
+    {
+      "id": "rate-122",
+      "employeeId": "emp-050",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 92
+    },
+    {
+      "id": "rate-123",
+      "employeeId": "emp-050",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 95
+    },
+    {
+      "id": "rate-124",
+      "employeeId": "emp-051",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 87
+    },
+    {
+      "id": "rate-125",
+      "employeeId": "emp-051",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 96
+    },
+    {
+      "id": "rate-126",
+      "employeeId": "emp-052",
+      "validFrom": "2024-07-01",
+      "hourlyCost": 92
+    },
+    {
+      "id": "rate-127",
+      "employeeId": "emp-052",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 95
+    },
+    {
+      "id": "rate-128",
+      "employeeId": "emp-052",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 99
+    },
+    {
+      "id": "rate-129",
+      "employeeId": "emp-053",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 86
+    },
+    {
+      "id": "rate-130",
+      "employeeId": "emp-053",
+      "validFrom": "2027-03-10",
+      "hourlyCost": 89
+    },
+    {
+      "id": "rate-131",
+      "employeeId": "emp-054",
+      "validFrom": "2024-07-01",
+      "hourlyCost": 77
+    },
+    {
+      "id": "rate-132",
+      "employeeId": "emp-054",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 85
+    },
+    {
+      "id": "rate-133",
+      "employeeId": "emp-054",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 93
+    },
+    {
+      "id": "rate-134",
+      "employeeId": "emp-054",
+      "validFrom": "2026-08-01",
+      "hourlyCost": 100
+    },
+    {
+      "id": "rate-135",
+      "employeeId": "emp-055",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 114
+    },
+    {
+      "id": "rate-136",
+      "employeeId": "emp-055",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 117
+    },
+    {
+      "id": "rate-137",
+      "employeeId": "emp-055",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 122
+    },
+    {
+      "id": "rate-138",
+      "employeeId": "emp-055",
+      "validFrom": "2026-08-01",
+      "hourlyCost": 130
+    },
+    {
+      "id": "rate-139",
+      "employeeId": "emp-056",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 91
+    },
+    {
+      "id": "rate-140",
+      "employeeId": "emp-056",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 100
+    },
+    {
+      "id": "rate-141",
+      "employeeId": "emp-057",
+      "validFrom": "2024-07-01",
+      "hourlyCost": 119
+    },
+    {
+      "id": "rate-142",
+      "employeeId": "emp-057",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 128
+    },
+    {
+      "id": "rate-143",
+      "employeeId": "emp-057",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 137
+    },
+    {
+      "id": "rate-144",
+      "employeeId": "emp-057",
+      "validFrom": "2026-08-01",
+      "hourlyCost": 143
+    },
+    {
+      "id": "rate-145",
+      "employeeId": "emp-058",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 92
+    },
+    {
+      "id": "rate-146",
+      "employeeId": "emp-058",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 96
+    },
+    {
+      "id": "rate-147",
+      "employeeId": "emp-059",
+      "validFrom": "2024-07-01",
+      "hourlyCost": 69
+    },
+    {
+      "id": "rate-148",
+      "employeeId": "emp-059",
+      "validFrom": "2025-07-01",
+      "hourlyCost": 78
+    },
+    {
+      "id": "rate-149",
+      "employeeId": "emp-059",
+      "validFrom": "2026-01-01",
+      "hourlyCost": 84
+    },
+    {
+      "id": "rate-150",
+      "employeeId": "emp-060",
+      "validFrom": "2025-01-01",
+      "hourlyCost": 86
+    }
+  ]
+}
