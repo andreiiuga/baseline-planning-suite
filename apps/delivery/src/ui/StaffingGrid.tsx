@@ -68,6 +68,17 @@ export function StaffingGrid({
     [allocations],
   );
   const monthKeys = useMemo(() => months.map(formatYearMonth), [months]);
+  // Slicing a month by rate is not free and every cell needs it: compute each context once
+  // per (people, months) rather than on every render.
+  const contexts = useMemo(() => {
+    const cache = new Map<string, ReturnType<typeof contextFor>>();
+    return (employeeId: string, month: YearMonth) => {
+      if (!people) return null;
+      const key = `${employeeId}|${formatYearMonth(month)}`;
+      if (!cache.has(key)) cache.set(key, contextFor(people, employeeId, month));
+      return cache.get(key) ?? null;
+    };
+  }, [people]);
 
   const rows = useMemo(() => {
     const out: { id: string; depth: number }[] = [];
@@ -111,7 +122,7 @@ export function StaffingGrid({
       });
       return;
     }
-    const context = people ? contextFor(people, cell.employeeId, month) : null;
+    const context = contexts(cell.employeeId, month);
     // Cost is shown in the display currency but converted from EUR, the stored basis.
     const value = unit === 'eur' ? typed / currency.perEur : typed;
     const result = unitToPm(value, unit, context);
@@ -167,7 +178,7 @@ export function StaffingGrid({
   ): CellFlags => {
     const allocation = byCell.get(cellKey(itemId, employeeId, monthText));
     const load = capacity.get(employeeId, monthText);
-    const context = people ? contextFor(people, employeeId, month) : null;
+    const context = contexts(employeeId, month);
     const priced = allocation !== undefined && allocation.amount > 0;
     const coverage = context?.slicing.coverage ?? 'full';
     return {
