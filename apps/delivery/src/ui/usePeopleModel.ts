@@ -38,25 +38,47 @@ export function usePeopleModel(
     const rates = rateQuery ?? unavailableRateQuery;
     setLoaded('checking');
 
-    const refreshRates = async (employeeId: string): Promise<void> => {
-      const sequence = (latestRefresh.current.get(employeeId) ?? 0) + 1;
-      latestRefresh.current.set(employeeId, sequence);
-      const result = await rates.getRates([employeeId]);
-      // Ignore answers overtaken by a newer event for the same person.
+    /** Re-reads rates for several people in one call. */
+    const refreshRates = async (employeeIds: readonly string[]): Promise<void> => {
+      const sequences = new Map<string, number>();
+      for (const id of employeeIds) {
+        const sequence = (latestRefresh.current.get(id) ?? 0) + 1;
+        latestRefresh.current.set(id, sequence);
+        sequences.set(id, sequence);
+      }
+      const result = await rates.getRates(employeeIds);
       if (!mounted || result.status !== 'ok') return;
-      if (latestRefresh.current.get(employeeId) !== sequence) return;
+      // Ignore answers overtaken by a newer event for the same person.
+      const fresh = employeeIds.filter((id) => latestRefresh.current.get(id) === sequences.get(id));
+      if (fresh.length === 0) return;
       setLoaded((current) =>
         typeof current === 'string'
           ? current
           : {
               ...current,
-              rates: { ...current.rates, [employeeId]: result.data[employeeId] ?? [] },
+              rates: {
+                ...current.rates,
+                ...Object.fromEntries(fresh.map((id) => [id, result.data[id] ?? []])),
+              },
             },
       );
     };
 
+    // A burst of events (a reset, a bulk edit) collapses into one batched re-read.
+    const queued = new Set<string>();
+    let flushTimer: ReturnType<typeof setTimeout> | undefined;
+    const queueRefresh = (employeeId: string): void => {
+      queued.add(employeeId);
+      clearTimeout(flushTimer);
+      flushTimer = setTimeout(() => {
+        const ids = [...queued];
+        queued.clear();
+        void refreshRates(ids);
+      }, 0);
+    };
+
     const unsubscribe = bus.subscribe('rate:changed', ({ employeeId }) => {
-      if (initialLoadDone) void refreshRates(employeeId);
+      if (initialLoadDone) queueRefresh(employeeId);
       else missedWhileLoading.add(employeeId); // the initial read may predate this change
     });
 
@@ -71,11 +93,12 @@ export function usePeopleModel(
           : 'unavailable',
       );
       initialLoadDone = true;
-      for (const employeeId of missedWhileLoading) void refreshRates(employeeId);
+      if (missedWhileLoading.size > 0) void refreshRates([...missedWhileLoading]);
     })();
 
     return () => {
       mounted = false;
+      clearTimeout(flushTimer);
       unsubscribe();
     };
   }, [employeeQuery, rateQuery, bus]);

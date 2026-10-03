@@ -42,9 +42,15 @@ export function useOversubscription(
     };
 
     void refresh();
-    const unsubscribe = bus.subscribe('allocation:changed', () => void refresh());
+    // A burst of events (a reset, a deleted subtree) collapses into one re-read.
+    let pending: ReturnType<typeof setTimeout> | undefined;
+    const unsubscribe = bus.subscribe('allocation:changed', () => {
+      clearTimeout(pending);
+      pending = setTimeout(() => void refresh(), 0);
+    });
     return () => {
       mounted = false;
+      clearTimeout(pending);
       unsubscribe();
     };
   }, [totals, bus, idsKey]);
