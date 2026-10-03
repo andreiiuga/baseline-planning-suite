@@ -25,6 +25,25 @@ const COVERAGE_NOTES = {
   partial: 'A rate starts mid-month: working days before it cost nothing.',
 } as const;
 
+/** Moves focus to the same column of the previous or next person row. */
+function focusNeighbour(input: HTMLInputElement, direction: 'up' | 'down'): void {
+  const cell = input.closest('td');
+  const row = cell?.parentElement;
+  if (!cell || !row) return;
+  const column = [...row.children].indexOf(cell);
+  const step = (element: Element | null) =>
+    direction === 'up'
+      ? (element?.previousElementSibling ?? null)
+      : (element?.nextElementSibling ?? null);
+  for (let sibling = step(row); sibling; sibling = step(sibling)) {
+    const target = sibling.children[column]?.querySelector('input');
+    if (target) {
+      target.focus();
+      return;
+    }
+  }
+}
+
 /** One editable cell. Text is held as a draft while editing so live updates cannot clobber typing. */
 export function StaffingCell({ text, label, flags, onCommit }: Props) {
   const [draft, setDraft] = useState<string | null>(null);
@@ -63,6 +82,11 @@ export function StaffingCell({ text, label, flags, onCommit }: Props) {
         onKeyDown={(event) => {
           if (event.key === 'Enter') finish();
           if (event.key === 'Escape') setDraft(null);
+          if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+            event.preventDefault();
+            finish(); // commits any change, then moves on, as in a spreadsheet
+            focusNeighbour(event.currentTarget, event.key === 'ArrowUp' ? 'up' : 'down');
+          }
         }}
       />
       {flags.over ? (

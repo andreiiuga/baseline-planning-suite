@@ -224,6 +224,37 @@ describe('editing', () => {
   });
 });
 
+describe('keyboard', () => {
+  it('moves between rows in the same month column with the arrow keys, committing on the way', async () => {
+    const repository = createMemoryPlanRepository(seed);
+    const { user } = await setup({ repository });
+    const first = cell(personRow('016'), 1); // May 26, emp-016
+    const below = cell(personRow('044'), 1); // May 26, emp-044
+    await user.click(first);
+    await user.clear(first);
+    await user.type(first, '0.35');
+    await user.keyboard('{ArrowDown}');
+    expect(document.activeElement).toBe(below);
+    await waitFor(async () =>
+      expect(
+        (await repository.load()).allocations.find(
+          (a) =>
+            a.employeeId === 'emp-016' && a.month === '2026-05' && a.breakdownItemId === 'wbs-012',
+        )?.amount,
+      ).toBeCloseTo(0.35, 10),
+    );
+    await user.keyboard('{ArrowUp}');
+    expect(document.activeElement).toBe(cell(personRow('016'), 1));
+  });
+
+  it('labels every cell with person, work item path and month for screen readers', async () => {
+    await setup();
+    const label = cell(personRow('016'), 1).getAttribute('aria-label') ?? '';
+    expect(label).toMatch(/^\S.*, Ledger migration › Discovery › Design, May 26$/);
+    expect(label.split(', ')).toHaveLength(3); // person, work item path, month
+  });
+});
+
 describe('over capacity (Milan Brandt, June 2026)', () => {
   const brandtJune = 2; // Apr, May, Jun
 
