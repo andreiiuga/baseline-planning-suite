@@ -13,6 +13,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
+    "test:tz": "TZ=America/Los_Angeles vitest run && TZ=Pacific/Auckland vitest run",
     "test:contracts": "echo \"no contract suites yet\""
   },
   "devDependencies": {
