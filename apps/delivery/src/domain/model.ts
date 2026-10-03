@@ -6,6 +6,13 @@ export interface Employee {
   readonly weeklyHours: number;
 }
 
+export interface Project {
+  readonly id: string;
+  readonly name: string;
+  readonly startDate: string;
+  readonly endDate: string;
+}
+
 export interface BreakdownItem {
   readonly id: string;
   readonly projectId: string;
