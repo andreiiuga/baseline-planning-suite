@@ -1,27 +1,27 @@
 import { useEffect, useState } from 'react';
 import type { DeliveryAppProps } from './AppProps';
-import { unavailableRateQuery } from './adapters/unavailablePeople';
+import { getPlanRepository } from './adapters/idb/sharedRepository';
+import type { PlanRepository } from './ports/planRepository';
+import { DeliveryApp } from './ui/DeliveryApp';
 
-export default function App({ rateQuery, currency, activeUser }: DeliveryAppProps) {
-  const [rates, setRates] = useState<'checking' | 'available' | 'unavailable'>('checking');
+/** The federated entry (`delivery/App`): opens Delivery's own storage, then renders the UI. */
+export default function App(props: DeliveryAppProps) {
+  const [repository, setRepository] = useState<PlanRepository | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    let current = true;
-    void (rateQuery ?? unavailableRateQuery)
-      .getRates(['emp-001'])
-      .then((result) => current && setRates(result.status === 'ok' ? 'available' : 'unavailable'));
+    let mounted = true;
+    getPlanRepository().then(
+      (repo) => mounted && setRepository(repo),
+      (cause: unknown) =>
+        mounted && setError(cause instanceof Error ? cause.message : 'storage could not be opened'),
+    );
     return () => {
-      current = false;
+      mounted = false;
     };
-  }, [rateQuery]);
+  }, []);
 
-  return (
-    <section aria-label="Delivery">
-      <h2>Delivery</h2>
-      <p>
-        Signed in as {activeUser.name} · showing {currency.code}
-      </p>
-      <p data-testid="rates-status">Cost rates: {rates}</p>
-    </section>
-  );
+  if (error) return <p role="alert">Delivery storage is unavailable: {error}</p>;
+  if (!repository) return <p>Opening Delivery…</p>;
+  return <DeliveryApp {...props} repository={repository} />;
 }
