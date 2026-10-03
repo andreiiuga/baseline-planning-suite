@@ -1,29 +1,27 @@
 import { useEffect, useState } from 'react';
 import type { PeopleAppProps } from './AppProps';
-import { unavailableAllocationTotals } from './adapters/unavailableDelivery';
+import { getPeopleRepository } from './adapters/idb/sharedRepository';
+import type { PeopleRepository } from './ports/peopleRepository';
+import { PeopleApp } from './ui/PeopleApp';
 
-export default function App({ allocationTotals, currency, activeUser }: PeopleAppProps) {
-  const [capacity, setCapacity] = useState<'checking' | 'available' | 'unavailable'>('checking');
+/** The federated entry (`people/App`): opens People's own storage, then renders the UI. */
+export default function App(props: PeopleAppProps) {
+  const [repository, setRepository] = useState<PeopleRepository | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    let current = true;
-    void (allocationTotals ?? unavailableAllocationTotals)
-      .getMonthlyTotals(['emp-003'])
-      .then(
-        (result) => current && setCapacity(result.status === 'ok' ? 'available' : 'unavailable'),
-      );
+    let mounted = true;
+    getPeopleRepository().then(
+      (repo) => mounted && setRepository(repo),
+      (cause: unknown) =>
+        mounted && setError(cause instanceof Error ? cause.message : 'storage could not be opened'),
+    );
     return () => {
-      current = false;
+      mounted = false;
     };
-  }, [allocationTotals]);
+  }, []);
 
-  return (
-    <section aria-label="People">
-      <h2>People</h2>
-      <p>
-        Signed in as {activeUser.name} · showing {currency.code}
-      </p>
-      <p data-testid="capacity-status">Capacity data: {capacity}</p>
-    </section>
-  );
+  if (error) return <p role="alert">People storage is unavailable: {error}</p>;
+  if (!repository) return <p>Opening People…</p>;
+  return <PeopleApp {...props} repository={repository} />;
 }
