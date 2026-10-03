@@ -1,3 +1,4 @@
+import type { YearMonth } from './dates';
 import { apportion, formatScaled, toScaled, type Apportioned } from './rounding';
 import type { Unit } from './units';
 
@@ -28,4 +29,24 @@ export function formatUnit(scaled: number, unit: Unit): string {
 
 export function apportionUnit(values: readonly number[], unit: Unit): Apportioned {
   return apportion(values, UNIT_DECIMALS[unit]);
+}
+
+const MONTH_NAMES = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+] as const;
+
+/** "Apr 26": column headings. */
+export function monthLabel({ y, m }: YearMonth): string {
+  return `${MONTH_NAMES[m - 1] ?? '?'} ${String(y % 100).padStart(2, '0')}`;
 }

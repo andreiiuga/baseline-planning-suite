@@ -37,3 +37,11 @@ export function contextFor(employeeId: string, month: string): CellContext {
   if (!employee || !schedule) throw new Error(`Unknown employee ${employeeId}`);
   return cellContext(employee.weeklyHours, parseYearMonth(month), schedule);
 }
+
+export function ratesByEmployee(
+  records: readonly RateRecord[],
+): Record<string, readonly RateRecord[]> {
+  const grouped: Record<string, RateRecord[]> = {};
+  for (const record of records) (grouped[record.employeeId] ??= []).push(record);
+  return grouped;
+}

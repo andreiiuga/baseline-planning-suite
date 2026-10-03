@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { apportionUnit, displayValue, formatUnit, UNIT_DECIMALS } from '../../src/domain/display';
+import {
+  apportionUnit,
+  displayValue,
+  formatUnit,
+  monthLabel,
+  UNIT_DECIMALS,
+} from '../../src/domain/display';
+import { parseYearMonth } from '../../src/domain/dates';
 
 describe('display precision', () => {
   it('uses hours 2, person-months 2, percent 1, cost 2 decimals', () => {
@@ -36,5 +43,16 @@ describe('display precision', () => {
       '0.60',
       '0.25',
     ]);
+  });
+});
+
+describe('monthLabel', () => {
+  it.each([
+    ['2026-04', 'Apr 26'],
+    ['2027-03', 'Mar 27'],
+    ['2026-12', 'Dec 26'],
+    ['2030-01', 'Jan 30'],
+  ])('labels %s as %s', (month, label) => {
+    expect(monthLabel(parseYearMonth(month))).toBe(label);
   });
 });
