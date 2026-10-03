@@ -1,7 +1,7 @@
 import type { Allocation } from './model';
 
 /** One person-month of capacity, in person-months. */
-export const CAPACITY_PM = 1;
+const CAPACITY_PM = 1;
 
 /** Floating-point allowance for sums of decimals such as 0.1 + 0.7 + 0.2. Not a rounding budget. */
 const EPSILON = 1e-9;

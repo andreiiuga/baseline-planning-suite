@@ -35,7 +35,7 @@ export type RateHistoryResult =
   | { readonly ok: true; readonly history: readonly RateRecord[] }
   | { readonly ok: false; readonly errors: RateFieldErrors };
 
-export const byValidFrom = (a: RateRecord, b: RateRecord): number =>
+const byValidFrom = (a: RateRecord, b: RateRecord): number =>
   a.validFrom < b.validFrom ? -1 : a.validFrom > b.validFrom ? 1 : 0;
 
 /** ISO dates sort lexicographically, so no date arithmetic is needed. */

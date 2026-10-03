@@ -43,7 +43,7 @@ export interface RawSeed {
   allocations: RawAllocation[];
 }
 
-export const SEED_VERSION = 1;
+const SEED_VERSION = 1;
 
 export const EXPECTED_COUNTS = {
   employees: 60,

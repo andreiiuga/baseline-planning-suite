@@ -5,7 +5,7 @@ import type { PeopleRepository } from '../../ports/peopleRepository';
 import { assertOwnedBy } from '../assertOwnedBy';
 import type { PeopleSeed } from '../seed/types';
 
-export const PEOPLE_DB_NAME = 'baseline-people';
+const PEOPLE_DB_NAME = 'baseline-people';
 const SCHEMA_VERSION = 1;
 
 interface PeopleDb extends DBSchema {

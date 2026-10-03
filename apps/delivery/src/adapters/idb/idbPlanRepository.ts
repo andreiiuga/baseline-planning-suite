@@ -5,7 +5,7 @@ import type { AllocationCell, PlanRepository } from '../../ports/planRepository'
 import { assertValidAmount, newAllocationId, sameCell } from '../allocationCells';
 import type { DeliverySeed } from '../seed/types';
 
-export const DELIVERY_DB_NAME = 'baseline-delivery';
+const DELIVERY_DB_NAME = 'baseline-delivery';
 const SCHEMA_VERSION = 1;
 
 interface DeliveryDb extends DBSchema {
