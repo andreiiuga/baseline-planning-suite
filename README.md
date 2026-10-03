@@ -40,12 +40,14 @@ The shell must stay alive when a remote fails and say so in place of that panel.
 # 1. Stop the container (remote is down)
 docker compose stop people
 
-# 2. Or point the shell at a URL that 404s
-PEOPLE_REMOTE_URL=http://localhost:8081/does-not-exist.js docker compose up shell
+# 2. Or point the shell at a URL that 404s (no rebuild, the shell container restarts)
+PEOPLE_REMOTE_URL=http://localhost:8082/does-not-exist.js docker compose up -d shell
 
-# 3. Or point it at a dead host (exercises the load timeout, about 5s)
-PEOPLE_REMOTE_URL=http://localhost:9999/remoteEntry.js docker compose up shell
+# 3. Or point it at a dead host
+PEOPLE_REMOTE_URL=http://localhost:9999/remoteEntry.js docker compose up -d shell
 ```
+
+Restore with `docker compose up -d` (plus `docker compose start people` after option 1). A refused connection fails immediately; a host that accepts but never answers hits the shell's 5 s load timeout, which is covered by a unit test (`apps/shell/tests/timeout.test.ts`).
 
 Expected: the People panel shows "People is unavailable". Delivery still loads. Delivery's capacity and cost views degrade to "unavailable" for anything that needs People's data, instead of crashing.
 
@@ -56,6 +58,8 @@ Expected: the People panel shows "People is unavailable". Delivery still loads. 
 | `PEOPLE_REMOTE_URL`   | shell            | `http://localhost:8081/remoteEntry.js` |
 | `DELIVERY_REMOTE_URL` | shell            | `http://localhost:8082/remoteEntry.js` |
 | `ALLOWED_ORIGIN`      | people, delivery | `http://localhost:8080`                |
+
+Host ports can be overridden with `SHELL_PORT`, `PEOPLE_PORT` and `DELIVERY_PORT` (for example when 8081 is taken by another tool). If you move a remote, set its `*_REMOTE_URL` to match, because the browser resolves it.
 
 The shell's entrypoint writes these into `/config.json` at container start. The URLs are never part of a bundle, so the same image can point anywhere.
 
