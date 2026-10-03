@@ -4,3 +4,5 @@ coverage
 pnpm-lock.yaml
 docs
 apps/*/src/adapters/seed
+test-results
+playwright-report

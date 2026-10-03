@@ -15,10 +15,12 @@
     "test": "vitest run",
     "test:tz": "TZ=America/Los_Angeles vitest run && TZ=Pacific/Auckland vitest run",
     "test:contracts": "vitest run integration apps/delivery/tests/contracts apps/people/tests/contracts",
-    "seed:slices": "tsx scripts/make-seed-slices.ts"
+    "seed:slices": "tsx scripts/make-seed-slices.ts",
+    "e2e": "playwright test"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
+    "@playwright/test": "^1.63.0",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.7",

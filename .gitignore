@@ -8,3 +8,5 @@ coverage/
 !.env.example
 .vite/
 .claude/settings.local.json
+test-results/
+playwright-report/
