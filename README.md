@@ -4,10 +4,10 @@ Baseline answers one question for a delivery organisation: **who is working on w
 
 It is built as three independently built and deployed micro-frontends:
 
-| App | Owns | Port |
-|---|---|---|
-| **shell** | Navigation, display currency, active user, composition of the other two | 8080 |
-| **people** | Employee register, weekly hours, effective-dated cost-rate history | 8081 |
+| App          | Owns                                                                                 | Port |
+| ------------ | ------------------------------------------------------------------------------------ | ---- |
+| **shell**    | Navigation, display currency, active user, composition of the other two              | 8080 |
+| **people**   | Employee register, weekly hours, effective-dated cost-rate history                   | 8081 |
 | **delivery** | Projects, work breakdown tree, month-by-month staffing grid, cost and capacity views | 8082 |
 
 > **Status note:** run instructions and file paths below describe the intended layout. Verify each command against the repository as it stands and update this file if anything drifted.
@@ -26,11 +26,11 @@ docker compose up --build
 
 Open <http://localhost:8080>.
 
-| URL | What |
-|---|---|
+| URL                   | What                              |
+| --------------------- | --------------------------------- |
 | http://localhost:8080 | Shell (hosts People and Delivery) |
-| http://localhost:8081 | People, standalone |
-| http://localhost:8082 | Delivery, standalone |
+| http://localhost:8081 | People, standalone                |
+| http://localhost:8082 | Delivery, standalone              |
 
 ### Break a remote on purpose
 
@@ -51,11 +51,11 @@ Expected: the People panel shows "People is unavailable". Delivery still loads. 
 
 ### Configuration (container environment)
 
-| Variable | Container | Default |
-|---|---|---|
-| `PEOPLE_REMOTE_URL` | shell | `http://localhost:8081/remoteEntry.js` |
-| `DELIVERY_REMOTE_URL` | shell | `http://localhost:8082/remoteEntry.js` |
-| `ALLOWED_ORIGIN` | people, delivery | `http://localhost:8080` |
+| Variable              | Container        | Default                                |
+| --------------------- | ---------------- | -------------------------------------- |
+| `PEOPLE_REMOTE_URL`   | shell            | `http://localhost:8081/remoteEntry.js` |
+| `DELIVERY_REMOTE_URL` | shell            | `http://localhost:8082/remoteEntry.js` |
+| `ALLOWED_ORIGIN`      | people, delivery | `http://localhost:8080`                |
 
 The shell's entrypoint writes these into `/config.json` at container start. The URLs are never part of a bundle, so the same image can point anywhere.
 
@@ -348,11 +348,16 @@ Three small interfaces, each owned by its consumer (interface segregation):
 ```ts
 type Availability<T> = { status: 'ok'; data: T } | { status: 'unavailable' };
 
-interface EmployeeQuery { listEmployees(): Promise<Availability<Employee[]>> }
-interface RateQuery     { getRates(ids: string[]): Promise<Availability<Record<string, RateRecord[]>>> }
+interface EmployeeQuery {
+  listEmployees(): Promise<Availability<Employee[]>>;
+}
+interface RateQuery {
+  getRates(ids: string[]): Promise<Availability<Record<string, RateRecord[]>>>;
+}
 interface AllocationTotals {
-  getMonthlyTotals(ids: string[]): Promise<Availability<
-    { employeeId: string; month: string; allocatedPM: number }[]>>;
+  getMonthlyTotals(
+    ids: string[],
+  ): Promise<Availability<{ employeeId: string; month: string; allocatedPM: number }[]>>;
 }
 ```
 
@@ -365,9 +370,9 @@ interface AllocationTotals {
 
 Two events, each defined by its publisher:
 
-| Event | Owner | Subscriber behaviour |
-|---|---|---|
-| `rate:changed { employeeId }` | People | Delivery re-reads rates for that employee |
+| Event                                      | Owner    | Subscriber behaviour                         |
+| ------------------------------------------ | -------- | -------------------------------------------- |
+| `rate:changed { employeeId }`              | People   | Delivery re-reads rates for that employee    |
 | `allocation:changed { employeeId, month }` | Delivery | People re-reads that person's monthly totals |
 
 Rules: events are notifications and not data transfer, handlers are idempotent, and `publish` isolates handler failures with try/catch so one broken subscriber cannot stop the others. "Give me the rate" is a port call. "A rate changed" is an event.
@@ -431,40 +436,40 @@ Totals are computed from exact values and rounded only for display. Displayed to
 
 Working days are Monday to Friday. Public holidays are ignored.
 
-| Concept | Rule |
-|---|---|
-| Person-month | `weeklyHours x (working days in month / 5)` |
-| Hours per working day | `allocation hours / working days in month` |
-| Month cost | sum over rate slices of `working days in slice x hours per day x hourly cost` |
-| Rate validity | from `validFrom` (inclusive) until the next record starts, the last record is open-ended |
-| % of capacity | PM x 100 |
-| Blended rate | month cost / allocation hours |
+| Concept               | Rule                                                                                     |
+| --------------------- | ---------------------------------------------------------------------------------------- |
+| Person-month          | `weeklyHours x (working days in month / 5)`                                              |
+| Hours per working day | `allocation hours / working days in month`                                               |
+| Month cost            | sum over rate slices of `working days in slice x hours per day x hourly cost`            |
+| Rate validity         | from `validFrom` (inclusive) until the next record starts, the last record is open-ended |
+| % of capacity         | PM x 100                                                                                 |
+| Blended rate          | month cost / allocation hours                                                            |
 
 ### Golden reference
 
 A. Okafor, 40 h/week, EUR 80/h from 2025-01-01 and EUR 95/h from 2026-03-12, one cell of 0.50 PM in March 2026:
 
-| Quantity | Value |
-|---|---|
-| Working days in March 2026 | 22 |
-| Before 12 March / from 12 March | 8 / 14 |
-| One person-month | 40 x 22 / 5 = 176.00 h |
-| This allocation | 88.00 h (4.00 h per day) |
-| Cost | 8 x 4 x 80 + 14 x 4 x 95 = 2,560 + 5,320 = **EUR 7,880.00** |
-| % of capacity | 50.0% |
-| Blended rate | EUR 89.5455/h |
+| Quantity                        | Value                                                       |
+| ------------------------------- | ----------------------------------------------------------- |
+| Working days in March 2026      | 22                                                          |
+| Before 12 March / from 12 March | 8 / 14                                                      |
+| One person-month                | 40 x 22 / 5 = 176.00 h                                      |
+| This allocation                 | 88.00 h (4.00 h per day)                                    |
+| Cost                            | 8 x 4 x 80 + 14 x 4 x 95 = 2,560 + 5,320 = **EUR 7,880.00** |
+| % of capacity                   | 50.0%                                                       |
+| Blended rate                    | EUR 89.5455/h                                               |
 
 ---
 
 ## 6. Testing strategy
 
-| Level | Where | What |
-|---|---|---|
-| Unit | `apps/*/tests/unit` | Pure domain logic with no React: working days, slicing, conversions, rounding, rollups, capacity, breakdown rules. The golden reference lives here. |
-| Property | `apps/delivery/tests/unit` | `fast-check` on largest-remainder: sum identity, each cell within one unit of exact, parent identities. |
-| Contract | `apps/delivery/tests/contracts` | `runRateQueryContract(factory)` asserts what Delivery relies on (sorted by `validFrom`, unknown employee gives an empty list, date format). |
-| Integration | `integration/contracts` | Runs the same suite against People's real adapter. People's CI must run it before a release. |
-| Resilience | `apps/shell/tests/resilience` | A broken or slow remote renders the fallback panel and the rest of the shell keeps working. |
+| Level       | Where                           | What                                                                                                                                                |
+| ----------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit        | `apps/*/tests/unit`             | Pure domain logic with no React: working days, slicing, conversions, rounding, rollups, capacity, breakdown rules. The golden reference lives here. |
+| Property    | `apps/delivery/tests/unit`      | `fast-check` on largest-remainder: sum identity, each cell within one unit of exact, parent identities.                                             |
+| Contract    | `apps/delivery/tests/contracts` | `runRateQueryContract(factory)` asserts what Delivery relies on (sorted by `validFrom`, unknown employee gives an empty list, date format).         |
+| Integration | `integration/contracts`         | Runs the same suite against People's real adapter. People's CI must run it before a release.                                                        |
+| Resilience  | `apps/shell/tests/resilience`   | A broken or slow remote renders the fallback panel and the rest of the shell keeps working.                                                         |
 
 Date logic is also run under `TZ=America/Los_Angeles` and `TZ=Pacific/Auckland`.
 
