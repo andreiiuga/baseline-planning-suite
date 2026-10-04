@@ -181,11 +181,14 @@ export function StaffingGrid({
     const context = contexts(employeeId, month);
     const priced = allocation !== undefined && allocation.amount > 0;
     const coverage = context?.slicing.coverage ?? 'full';
+    // Over capacity is a fact about the person-month, but only cells that actually carry load
+    // are marked: an empty cell of an overloaded person is not where the problem is.
+    const contributes = Boolean(load?.over && priced);
     return {
-      over: load?.over ?? false,
-      overNote: load?.over ? describeCulprit(load, allItems, projects) : null,
+      over: contributes,
+      overNote: load && contributes ? describeCulprit(load, allItems, projects) : null,
       culprit: Boolean(
-        load?.over && load.culprit && allocation && load.culprit.id === allocation.id,
+        contributes && load?.culprit && allocation && load.culprit.id === allocation.id,
       ),
       coverage: priced && coverage !== 'full' ? coverage : null,
       disabledReason:

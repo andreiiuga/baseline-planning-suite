@@ -273,6 +273,23 @@ describe('over capacity (Milan Brandt, June 2026)', () => {
     );
   });
 
+  it('marks only cells that carry load, not the empty cells of an overloaded person-month', async () => {
+    await setup();
+    // Brandt is over capacity in June (index 2). His June cell on Design carries 0.59...
+    expect(cell(personRow('003'), brandtJune).closest('td')?.getAttribute('data-over')).toBe(
+      'true',
+    );
+    // ...but his 0.00 cell the same month on another item in this project is not marked.
+    const empty = cell(personRow('003', 'wbs-014'), brandtJune);
+    expect(empty.value).toBe('0.00');
+    expect(empty.closest('td')?.getAttribute('data-over')).toBeNull();
+    expect(empty.closest('td')?.textContent).not.toContain('†');
+    // The over-capacity list still names him.
+    expect(screen.getByRole('region', { name: 'Over capacity' }).textContent).toContain(
+      'Milan Brandt',
+    );
+  });
+
   it('does not block the edit: it saves and warns, naming the culprit', async () => {
     const { user, repository } = await setup();
     const input = cell(personRow('003'), 0); // Brandt, April, no other load there

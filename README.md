@@ -458,7 +458,7 @@ Totals are computed from exact values and rounded only for display. Displayed to
 - A person row is authoritative: its months are apportioned by largest remainder so the row total is the exact sum rounded once. Leaf, parent and footer rows are integer sums of what is shown. A shown cell can therefore differ from its own independent rounding by one last-place unit.
 - Editing converts what was typed back through the unit and display currency to person-months. **Text that is unchanged never writes**, so switching units back and forth, or retyping the value that is already shown, cannot alter a stored amount.
 - Typed text must be a plain amount (`7,880.00`, `0.5`). Blanks, signs, exponents and anything else are refused with a message instead of being guessed.
-- Over-capacity edits are saved and flagged, never blocked. The message and an "Over capacity" list name the most recently edited allocation across all projects.
+- Over capacity is a fact about a person-month, but only cells that carry load (an allocation above zero) are marked; an empty cell of an overloaded person is not. Over-capacity edits are saved and flagged, never blocked. The message and an "Over capacity" list name the most recently edited allocation across all projects.
 - Hours and cost need People. If it is unavailable they are disabled and the grid falls back to person-months rather than showing wrong numbers.
 - Arrow up and down move between rows in the same month column, committing on the way.
 
