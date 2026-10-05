@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createEventBus } from './bus/eventBus';
 import { CURRENCIES, currencyByCode } from './chrome/currency';
 import { USERS, userById } from './chrome/session';
@@ -6,18 +6,18 @@ import { readPreference, writePreference } from './chrome/storage';
 import type { RemoteName } from './config';
 import type { DeliveryAppProps, PeopleAppProps } from './contracts';
 import type { Ports } from './compose';
-import { markVisited } from './navigation';
+import { markVisited, SECTIONS, titleFor } from './navigation';
 import { RemotePanel } from './RemotePanel';
-
-const SECTIONS: readonly { readonly name: RemoteName; readonly label: string }[] = [
-  { name: 'people', label: 'People' },
-  { name: 'delivery', label: 'Delivery' },
-];
+import { SectionLink } from './SectionLink';
+import { useRoute } from './useRoute';
 
 export function Shell({ ports }: { readonly ports: Ports }) {
   const bus = useMemo(() => createEventBus(), []);
-  const [active, setActive] = useState<RemoteName>('people');
-  const [visited, setVisited] = useState<ReadonlySet<RemoteName>>(() => new Set(['people']));
+  const { active, navigate } = useRoute();
+  const [visited, setVisited] = useState<ReadonlySet<RemoteName>>(() => new Set([active]));
+  // Whatever the URL points at is mounted now (no extra render first); the state keeps it mounted.
+  const mounted = markVisited(visited, active);
+  useEffect(() => setVisited(mounted), [mounted]);
   const [currency, setCurrency] = useState(() => currencyByCode(readPreference('currency')));
   const [activeUser, setActiveUser] = useState(() => userById(readPreference('user')));
 
@@ -35,10 +35,15 @@ export function Shell({ ports }: { readonly ports: Ports }) {
     activeUser,
   };
 
-  const show = (name: RemoteName) => {
-    setActive(name);
-    setVisited((current) => markVisited(current, name));
-  };
+  // Title follows the section, and focus moves to the panel after a navigation so keyboard and
+  // screen-reader users land in the new content rather than on the link they just used.
+  const panels = useRef(new Map<RemoteName, HTMLDivElement>());
+  const firstRender = useRef(true);
+  useEffect(() => {
+    document.title = titleFor(active);
+    if (firstRender.current) firstRender.current = false;
+    else panels.current.get(active)?.focus();
+  }, [active]);
 
   return (
     <div className="shell">
@@ -46,14 +51,9 @@ export function Shell({ ports }: { readonly ports: Ports }) {
         <h1>Baseline</h1>
         <nav aria-label="Sections">
           {SECTIONS.map(({ name, label }) => (
-            <button
-              key={name}
-              type="button"
-              aria-current={active === name ? 'page' : undefined}
-              onClick={() => show(name)}
-            >
+            <SectionLink key={name} name={name} active={active === name} onNavigate={navigate}>
               {label}
-            </button>
+            </SectionLink>
           ))}
         </nav>
         <div className="shell-controls">
@@ -93,8 +93,17 @@ export function Shell({ ports }: { readonly ports: Ports }) {
       </header>
       <main>
         {SECTIONS.map(({ name }) =>
-          visited.has(name) ? (
-            <div key={name} data-panel={name} hidden={active !== name}>
+          mounted.has(name) ? (
+            <div
+              key={name}
+              data-panel={name}
+              hidden={active !== name}
+              tabIndex={-1}
+              ref={(element) => {
+                if (element) panels.current.set(name, element);
+                else panels.current.delete(name);
+              }}
+            >
               {name === 'people' ? (
                 <RemotePanel name="people" appProps={peopleProps} />
               ) : (
