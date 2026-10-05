@@ -228,7 +228,7 @@ baseline-planning-suite/
 │   │   │   ├── SectionLink.tsx       # a real link the shell upgrades to in-page navigation
 │   │   │   ├── RemotePanel.tsx       # ErrorBoundary + Suspense + timeout + Retry per remote
 │   │   │   ├── bus/eventBus.ts       # typed event bus with isolated handlers
-│   │   │   └── chrome/               # currency table, user list, localStorage preferences
+│   │   │   └── chrome/               # the shell's own UI chrome (the frame around the content, not the browser): currency table, user list, localStorage preferences
 │   │   └── tests/
 │   ├── people/                       # employee register and rate history
 │   │   ├── src/
@@ -523,15 +523,15 @@ A. Okafor, 40 h/week, EUR 80/h from 2025-01-01 and EUR 95/h from 2026-03-12, one
 
 ## 6. Testing strategy
 
-| Level       | Where                                       | What                                                                                                                                                                                                             |
-| ----------- | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unit        | `apps/*/tests/unit`                         | Pure domain logic with no React: working days, slicing, conversions, rounding, rollups, capacity, tree rules, rate history. The golden reference is `golden-reference.test.ts`.                                  |
-| Property    | `apps/delivery/tests/unit/rounding.test.ts` | `fast-check` on largest-remainder: sum identity, each cell within one unit of exact, total is the exact sum rounded once.                                                                                        |
-| Reconcile   | `apps/delivery/tests/unit/rollup.test.ts`   | Every row, column and total adds up across the whole seed, in every unit, for every project.                                                                                                                     |
-| Contract    | `apps/*/tests/contracts`                    | The consumer-owned suites: `RateQuery` and `EmployeeQuery` (Delivery), `AllocationTotals` (People). They pin behaviour, including that `validFrom` is inclusive and the last rate open.                          |
-| Integration | `integration/`                              | Each provider's real adapter, over real IndexedDB storage, runs against the other app's contract suite; the shell bus fits both bus ports; both apps share the capacity threshold; seed slices have not drifted. |
-| Component   | `apps/*/tests/ui`                           | React Testing Library: register search, rate editing and validation, tree operations and keyboard, grid editing in every unit, over-capacity, People unavailable, live rate changes.                             |
-| End to end  | `e2e/` (`pnpm e2e`)                         | Playwright against the compose stack: the headline live update, cross-app oversubscription, persistence, a remote failing, a broken `config.json`, standalone mode.                                              |
+| Level       | Where                                       | What                                                                                                                                                                                                                                                                                  |
+| ----------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit        | `apps/*/tests/unit`                         | Pure domain logic with no React: working days, slicing, conversions, rounding, rollups, capacity, tree rules, rate history. The golden reference is `golden-reference.test.ts`. The shell's route logic, event bus and config are unit-tested too (`apps/shell/tests`).               |
+| Property    | `apps/delivery/tests/unit/rounding.test.ts` | `fast-check` on largest-remainder: sum identity, each cell within one unit of exact, total is the exact sum rounded once.                                                                                                                                                             |
+| Reconcile   | `apps/delivery/tests/unit/rollup.test.ts`   | Every row, column and total adds up across the whole seed, in every unit, for every project.                                                                                                                                                                                          |
+| Contract    | `apps/*/tests/contracts`                    | The consumer-owned suites: `RateQuery` and `EmployeeQuery` (Delivery), `AllocationTotals` (People). They pin behaviour, including that `validFrom` is inclusive and the last rate open.                                                                                               |
+| Integration | `integration/`                              | Each provider's real adapter, over real IndexedDB storage, runs against the other app's contract suite; the shell bus fits both bus ports; both apps share the capacity threshold; seed slices have not drifted.                                                                      |
+| Component   | `apps/*/tests/ui`                           | React Testing Library: register search, rate editing and validation, tree operations and keyboard, grid editing in every unit, the Over capacity view, People unavailable, live rate changes, reset and event bursts.                                                                 |
+| End to end  | `e2e/` (`pnpm e2e`)                         | Playwright against the compose stack: the headline live update, cross-app oversubscription, persistence, a remote failing, a broken `config.json`, standalone mode, routing (deep links, Back and Forward, panels staying mounted) and the Over capacity view clearing People's flag. |
 
 Date logic is also run under `TZ=America/Los_Angeles` and `TZ=Pacific/Auckland` (`pnpm test:tz`, and in CI). The break tests were exercised for real: renaming a field in People's published rates fails five contract tests.
 
@@ -561,14 +561,15 @@ Not in scope, per the brief: visual polish, a design system, authentication, mob
 
 Small changes a reviewer is likely to ask for, and the files they touch:
 
-| Change                                    | Where                                                                                                                                                                                                                              | Files  |
-| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| Add a display currency                    | `apps/shell/src/chrome/currency.ts` (the table). Both apps receive it as a prop.                                                                                                                                                   | 1      |
-| Show another field in the People register | `apps/people/src/ui/EmployeeRegister.tsx` (and the `Employee` type if the field is new)                                                                                                                                            | 1 to 2 |
-| Change the over-capacity threshold        | `apps/delivery/src/domain/capacity.ts` and `apps/people/src/domain/capacity.ts`. Each app owns its copy on purpose; the integration test fails if they disagree.                                                                   | 2      |
-| Change rounding precision for a unit      | `apps/delivery/src/domain/display.ts`                                                                                                                                                                                              | 1      |
-| Change which days count as working days   | `apps/delivery/src/domain/dates.ts`                                                                                                                                                                                                | 1      |
-| Add a unit to the grid                    | `units.ts` (converter), `display.ts` (precision), `staffing.ts` and `ui/StaffingGrid.tsx` (the places that special-case units), `ui/DeliveryApp.tsx` (label). The exhaustive `Record<Unit, …>` tables make the compiler list them. | 5      |
+| Change                                                        | Where                                                                                                                                                                                                                              | Files  |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| Add a display currency                                        | `apps/shell/src/chrome/currency.ts` (the table). Both apps receive it as a prop.                                                                                                                                                   | 1      |
+| Show another field in the People register                     | `apps/people/src/ui/EmployeeRegister.tsx` (and the `Employee` type if the field is new)                                                                                                                                            | 1 to 2 |
+| Change the over-capacity threshold                            | `apps/delivery/src/domain/capacity.ts` and `apps/people/src/domain/capacity.ts`. Each app owns its copy on purpose; the integration test fails if they disagree.                                                                   | 2      |
+| Change rounding precision for a unit                          | `apps/delivery/src/domain/display.ts`                                                                                                                                                                                              | 1      |
+| Change which days count as working days                       | `apps/delivery/src/domain/dates.ts`                                                                                                                                                                                                | 1      |
+| Change how a reduction is suggested in the Over capacity view | `amountThatFits` in `apps/delivery/src/domain/capacity.ts`                                                                                                                                                                         | 1      |
+| Add a unit to the grid                                        | `units.ts` (converter), `display.ts` (precision), `staffing.ts` and `ui/StaffingGrid.tsx` (the places that special-case units), `ui/DeliveryApp.tsx` (label). The exhaustive `Record<Unit, …>` tables make the compiler list them. | 5      |
 
 ## 9. What I would do next
 
@@ -578,3 +579,6 @@ Small changes a reviewer is likely to ask for, and the files they touch:
 - Cross-tab sync through `BroadcastChannel` on the bus.
 - A virtualised grid, full ARIA treegrid keyboard support, and locale-aware number entry.
 - Undo for allocation edits, and an "edited by" stamp using the active user.
+- Moving or reassigning an allocation from the Over capacity view (to another month or person), with rules for collisions and for capacity on both sides.
+- Showing People _why_ someone is oversubscribed (the contributing allocations), either through a richer contract or a link into Delivery's Over capacity view.
+- Shareable deep links that carry remote state (selected employee, project, month window, unit), through an explicit route contract with each remote.
