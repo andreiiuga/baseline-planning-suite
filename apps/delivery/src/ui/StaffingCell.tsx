@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { AmountInput } from './AmountInput';
 
 export interface CellFlags {
   /** This person is allocated beyond capacity in this month (across all projects). */
@@ -44,16 +44,8 @@ function focusNeighbour(input: HTMLInputElement, direction: 'up' | 'down'): void
   }
 }
 
-/** One editable cell. Text is held as a draft while editing so live updates cannot clobber typing. */
+/** One editable cell. Typing and committing live in `AmountInput`; this adds the flags. */
 export function StaffingCell({ text, label, flags, onCommit }: Props) {
-  const [draft, setDraft] = useState<string | null>(null);
-
-  const finish = () => {
-    const pending = draft;
-    setDraft(null);
-    if (pending !== null) void onCommit(pending);
-  };
-
   const notes = [
     flags.over ? `Over capacity. ${flags.overNote ?? ''}` : null,
     flags.coverage ? COVERAGE_NOTES[flags.coverage] : null,
@@ -68,26 +60,12 @@ export function StaffingCell({ text, label, flags, onCommit }: Props) {
       data-coverage={flags.coverage ?? undefined}
       title={notes.join(' ') || undefined}
     >
-      <input
-        value={draft ?? text}
-        aria-label={label}
-        inputMode="decimal"
+      <AmountInput
+        text={text}
+        label={label}
         disabled={flags.disabledReason !== null}
-        onFocus={(event) => {
-          setDraft(text);
-          event.currentTarget.select();
-        }}
-        onChange={(event) => setDraft(event.target.value)}
-        onBlur={finish}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter') finish();
-          if (event.key === 'Escape') setDraft(null);
-          if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-            event.preventDefault();
-            finish(); // commits any change, then moves on, as in a spreadsheet
-            focusNeighbour(event.currentTarget, event.key === 'ArrowUp' ? 'up' : 'down');
-          }
-        }}
+        onCommit={onCommit}
+        onArrow={focusNeighbour}
       />
       {flags.over ? (
         <span
