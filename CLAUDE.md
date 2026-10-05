@@ -133,9 +133,13 @@ Events (publisher owns the definition, payload is minimal, subscribers re-read t
 10. **Currency and user:** store EUR. Shell holds a static FX table (EUR, USD, GBP, illustrative, labeled in README), passes `{ code, perEur }` as a prop, persists choice in `localStorage`. Typing a cost in non-EUR: divide by `perEur`, then by blended rate. People edits rates in EUR only, with read-only converted values. Active user is a header dropdown with fixed names passed as a prop; optional `editedBy` stamp on allocation edits.
 11. **Rounding:** work in scaled integers (value x 10^dp): 2dp hours, PM, cost; 1dp %. Convert units on exact values first, never on rounded ones. Leaf rows authoritative: largest-remainder across months so row total = round(exact sum). Parent rows and footers = sums of displayed children (integers). Trade-off to state in README: a parent total can differ from the nearest-rounded exact value by a few last-place units. Ties go to earliest index. Add a small epsilon before flooring (0.285*100 = 28.499999999999996). Reject negative or non-finite input.
 
+### Routing (added after the plan)
+
+The shell routes between sections with the History API: `/people` and `/delivery`, hand-rolled (`navigation.ts`, `useRoute.ts`, `SectionLink.tsx`). Top level only: remotes receive no route and the URL carries none of their state. Panels stay mounted; routing only changes which is visible. See README 4.17.
+
 ## Status
 
-All nine stages in `PLAN.md` are done and pushed. A fresh clone builds with `docker compose up --build` and passes `pnpm e2e` (14 tests). See the README, section 7 for limitations and section 8 for where to change what.
+All nine stages in `PLAN.md` are done and pushed. A fresh clone builds with `docker compose up --build` and passes `pnpm e2e` (20 tests). See the README, section 7 for limitations and section 8 for where to change what.
 
 ## Planned build order (also the commit history)
 

@@ -26,11 +26,12 @@ docker compose up --build
 
 Open <http://localhost:8080>.
 
-| URL                   | What                              |
-| --------------------- | --------------------------------- |
-| http://localhost:8080 | Shell (hosts People and Delivery) |
-| http://localhost:8081 | People, standalone                |
-| http://localhost:8082 | Delivery, standalone              |
+| URL                                       | What                                                          |
+| ----------------------------------------- | ------------------------------------------------------------- |
+| http://localhost:8080                     | Shell (hosts People and Delivery); `/` redirects to `/people` |
+| http://localhost:8080/people, `/delivery` | A section of the shell, linkable and reloadable               |
+| http://localhost:8081                     | People, standalone                                            |
+| http://localhost:8082                     | Delivery, standalone                                          |
 
 ### Break a remote on purpose
 
@@ -221,7 +222,10 @@ baseline-planning-suite/
 │   │   │   ├── loadApis.ts           # load each remote's api module independently, with a timeout
 │   │   │   ├── compose.ts            # composition root: turn loaded apis into ports
 │   │   │   ├── contracts.ts          # the shell's opaque view of ports and App props
-│   │   │   ├── Shell.tsx             # header, navigation, panels kept mounted once visited
+│   │   │   ├── Shell.tsx             # header, links, panels kept mounted once visited
+│   │   │   ├── navigation.ts         # section paths, path to section, click handling (pure)
+│   │   │   ├── useRoute.ts           # the active section kept in step with the URL (History API)
+│   │   │   ├── SectionLink.tsx       # a real link the shell upgrades to in-page navigation
 │   │   │   ├── RemotePanel.tsx       # ErrorBoundary + Suspense + timeout + Retry per remote
 │   │   │   ├── bus/eventBus.ts       # typed event bus with isolated handlers
 │   │   │   └── chrome/               # currency table, user list, localStorage preferences
@@ -462,6 +466,18 @@ Totals are computed from exact values and rounded only for display. Displayed to
 - Hours and cost need People. If it is unavailable they are disabled and the grid falls back to person-months rather than showing wrong numbers.
 - Arrow up and down move between rows in the same month column, committing on the way.
 
+### 4.17 Routing
+
+The shell owns the top level only: `/people` and `/delivery`. It is a hand-rolled History API hook (`useRoute.ts`) over a pure module (`navigation.ts`), about 80 lines with tests, and no router library.
+
+- **Real links.** Navigation entries are `<a href>`. A plain left click is upgraded to in-page navigation; a modified or middle click is left to the browser, so open-in-new-tab and copy-link work.
+- **Only the first path segment counts.** `/people/anything` is still People, so a remote could own anything below its section later without the shell knowing.
+- **`/` and unknown paths** are replaced (not pushed) with `/people`, so Back does not bounce.
+- **Panels stay mounted.** Routing only changes which panel is visible. A router that unmounts the previous page would silently break "an open Delivery view still receives live updates" and discard what a user was doing. Landing directly on `/delivery` mounts only Delivery, which re-reads People's rates on mount.
+- **Remotes are untouched.** They receive no route; the URL never carries their state (selected employee, project, month window, unit). Putting it there needs a new contract and couples the shell to each remote's internals, in hosted and standalone mode alike. That is the next step if shareable deep links are wanted.
+- After navigating, the tab title follows the section and focus moves to the new panel.
+- The server needs the single-page fallback (`try_files … /index.html`, already in `nginx.shell.conf`) and the shell's assets and `/config.json` use absolute paths. Hosting under a sub-path would need a base setting that does not exist.
+
 ---
 
 ## 5. Domain reference
@@ -522,6 +538,7 @@ Date logic is also run under `TZ=America/Los_Angeles` and `TZ=Pacific/Auckland` 
 - Numbers are parsed with `.` as the decimal separator and `,` as thousands separator only.
 - Port 8081 is also used by other tools (Metro, for one). Override with `PEOPLE_PORT` and `PEOPLE_REMOTE_URL`; the end-to-end suite honours `PEOPLE_PORT`.
 - The staffing "added by" stamp using the active user was considered and not built.
+- Routing covers sections only: no remote state in the URL, and no sub-path hosting (see 4.17).
 
 Not in scope, per the brief: visual polish, a design system, authentication, mobile, offline support and scheduling.
 

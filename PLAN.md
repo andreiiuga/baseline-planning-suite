@@ -515,3 +515,4 @@ Stages that touch build or runtime config also run `docker compose build` and a 
 - The standalone event bus is a silent null object, not a local bus: nothing else is on it.
 - Stage 16's headline test uses Playwright through the installed Chrome (`pnpm e2e`); the resilience tests break a remote by intercepting its requests instead of stopping a container.
 - Stage 13 and 15 tests and code landed in somewhat larger commits than the commit lists above, because the register, editor and capacity state share one component.
+- Routing between sections was added after the plan (README 4.17): top level only, hand-rolled, remotes untouched, panels still kept mounted.
