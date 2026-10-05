@@ -249,14 +249,14 @@ baseline-planning-suite/
 │       │   │   ├── rounding.ts       # scaled integers, largest-remainder apportionment
 │       │   │   ├── display.ts        # per-unit precision, month labels
 │       │   │   ├── rollup.ts         # parent derivation, row, column and grand totals
-│       │   │   ├── capacity.ts       # cross-project capacity and culprit selection
+│       │   │   ├── capacity.ts       # cross-project capacity, contributors, culprit, excess
 │       │   │   ├── breakdown.ts      # create, rename, move, delete, allocation moves
 │       │   │   ├── staffing.ts       # the grid in a unit and currency, naming helpers
 │       │   │   └── amountInput.ts    # parsing typed amounts
 │       │   ├── ports/                # PlanRepository, RateQuery, EmployeeQuery, event types
 │       │   ├── adapters/             # IndexedDB and in-memory repositories, fixture and null adapters, seed
 │       │   ├── exposed/              # api.ts (delivery/api): allocation totals other apps use
-│       │   ├── ui/                   # tree, staffing grid and cell, data hooks
+│       │   ├── ui/                   # tree, staffing grid and cell, over-capacity view, amount input, data hooks
 │       │   ├── App.tsx               # exposed as delivery/App
 │       │   └── standalone.tsx
 │       └── tests/
@@ -478,6 +478,18 @@ The shell owns the top level only: `/people` and `/delivery`. It is a hand-rolle
 - After navigating, the tab title follows the section and focus moves to the new panel.
 - The server needs the single-page fallback (`try_files … /index.html`, already in `nginx.shell.conf`) and the shell's assets and `/config.json` use absolute paths. Hosting under a sub-path would need a base setting that does not exist.
 
+### 4.18 The Over capacity view
+
+A second tab in Delivery, next to Staffing, for finding and fixing overloaded people. The staffing grid shows one project, but capacity counts all of them, so this view lists **every over-capacity person-month across all projects** with **every allocation that makes it up**: project, work item, amount, and which was edited most recently. The tab carries a live count.
+
+- Amounts are edited in place (person-months only, because capacity is defined in them), reusing the grid's rules: a draft while typing, Enter or blur to commit, unchanged text never writes, and anything that is not a plain amount is refused with a message.
+- Each allocation has a one-click **Reduce to X**, where X is the amount that makes the person-month fit with nothing else changed (never below zero). It is a suggestion the user accepts, not an automatic fix: which allocation to reduce is a planning decision.
+- Edits are saved and never blocked, and announce `allocation:changed`, so People's badge updates by itself. A row disappears once the person is back within capacity, with a message saying so.
+- The grid's own over-capacity list links here ("Review and correct…").
+- Domain support is pure: `monthlyLoads` returns every non-zero contributor (most recently edited first; the first is the culprit), and `excessPm` and `amountThatFits` do the arithmetic.
+- Scope is deliberate: it edits amounts only. Moving an allocation to another month or person needs a target picker and rules for collisions and for capacity on both sides, and is not built.
+- While a row is being fixed the "most recently edited" label moves with each edit, which follows the brief's rule but can look odd mid-fix.
+
 ---
 
 ## 5. Domain reference
@@ -539,6 +551,7 @@ Date logic is also run under `TZ=America/Los_Angeles` and `TZ=Pacific/Auckland` 
 - Port 8081 is also used by other tools (Metro, for one). Override with `PEOPLE_PORT` and `PEOPLE_REMOTE_URL`; the end-to-end suite honours `PEOPLE_PORT`.
 - The staffing "added by" stamp using the active user was considered and not built.
 - Routing covers sections only: no remote state in the URL, and no sub-path hosting (see 4.17).
+- The Over capacity view corrects amounts only; it cannot move an allocation to another month or person (see 4.18).
 
 Not in scope, per the brief: visual polish, a design system, authentication, mobile, offline support and scheduling.
 

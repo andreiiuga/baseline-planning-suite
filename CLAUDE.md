@@ -137,9 +137,13 @@ Events (publisher owns the definition, payload is minimal, subscribers re-read t
 
 The shell routes between sections with the History API: `/people` and `/delivery`, hand-rolled (`navigation.ts`, `useRoute.ts`, `SectionLink.tsx`). Top level only: remotes receive no route and the URL carries none of their state. Panels stay mounted; routing only changes which is visible. See README 4.17.
 
+### Over capacity view (added after the plan)
+
+A second Delivery tab lists every over-capacity person-month across all projects with each contributing allocation, editable in person-months, with a one-click "Reduce to X" suggestion. Amounts only, no moving. See README 4.18.
+
 ## Status
 
-All nine stages in `PLAN.md` are done and pushed. A fresh clone builds with `docker compose up --build` and passes `pnpm e2e` (20 tests). See the README, section 7 for limitations and section 8 for where to change what.
+All nine stages in `PLAN.md` are done and pushed. A fresh clone builds with `docker compose up --build` and passes `pnpm e2e` (22 tests). See the README, section 7 for limitations and section 8 for where to change what.
 
 ## Planned build order (also the commit history)
 
