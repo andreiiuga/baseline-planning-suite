@@ -512,3 +512,164 @@ describe('bursts of events', () => {
     expect(calls[1]).toHaveLength(40);
   });
 });
+
+describe('the Over capacity view', () => {
+  const tab = () => screen.getByRole('button', { name: /^Over capacity/ });
+  const open = async (user: ReturnType<typeof userEvent.setup>) => {
+    await user.click(tab());
+    await screen.findByRole('heading', { name: 'Over capacity' });
+  };
+  const row = (employeeId: string, month: string) =>
+    document.querySelector(
+      `li[data-employee="${employeeId}"][data-month="${month}"]`,
+    ) as HTMLElement;
+  const amountInput = (container: HTMLElement, allocationId: string) =>
+    container.querySelector(`tr[data-allocation="${allocationId}"] input`) as HTMLInputElement;
+
+  it('counts the over-capacity person-months in the tab, from every project', async () => {
+    await setup();
+    expect(tab().textContent).toContain('6');
+  });
+
+  it('lists each over-capacity person-month once, earliest month first', async () => {
+    const { user } = await setup();
+    await open(user);
+    const rows = [...document.querySelectorAll('.over-rows > li')].map((li) =>
+      li.getAttribute('data-month'),
+    );
+    expect(rows).toHaveLength(6);
+    expect(rows).toEqual([...rows].sort());
+    expect(rows[0]).toBe('2026-05');
+  });
+
+  it('shows every allocation behind Brandt in June 2026, across both projects, the latest edit first', async () => {
+    const { user } = await setup();
+    await open(user);
+    const brandt = row('emp-003', '2026-06');
+    expect(brandt.textContent).toContain('1.18 person-months allocated, over by 0.18');
+    const lines = [...brandt.querySelectorAll('tbody tr')];
+    expect(lines.map((l) => l.getAttribute('data-allocation'))).toEqual(['alloc-073', 'alloc-050']);
+    expect(lines[0]?.textContent).toContain('Client Portal Rebuild');
+    expect(lines[0]?.textContent).toContain('Account management › Core build › Implementation');
+    expect(lines[0]?.textContent).toContain('most recently edited');
+    expect(lines[1]?.textContent).toContain('Ledger Consolidation');
+    expect(lines[1]?.textContent).not.toContain('most recently edited');
+  });
+
+  it('lets you correct an allocation in another project, and the row leaves once he fits', async () => {
+    const { user, repository, published } = await setup();
+    await open(user);
+    const input = amountInput(row('emp-003', '2026-06'), 'alloc-073');
+    await user.click(input);
+    await user.clear(input);
+    await user.type(input, '0.4');
+    await user.tab();
+    expect((await screen.findByRole('status')).textContent).toContain('is now within capacity');
+    await waitFor(() => expect(row('emp-003', '2026-06')).toBeNull());
+    const stored = (await repository.load()).allocations.find((a) => a.id === 'alloc-073');
+    expect(stored?.amount).toBeCloseTo(0.4, 10);
+    expect(stored?.seq).toBeGreaterThan(720);
+    expect(published).toContainEqual({
+      type: 'allocation:changed',
+      employeeId: 'emp-003',
+      month: '2026-06',
+    });
+    expect(tab().textContent).toContain('5');
+  });
+
+  it('says so when an edit is saved but the person is still over, and keeps the row with new totals', async () => {
+    const { user } = await setup();
+    await open(user);
+    const input = amountInput(row('emp-003', '2026-06'), 'alloc-073');
+    await user.click(input);
+    await user.clear(input);
+    await user.type(input, '0.55');
+    await user.tab();
+    expect((await screen.findByRole('status')).textContent).toMatch(/still over capacity, by 0.14/);
+    expect(row('emp-003', '2026-06').textContent).toContain(
+      '1.14 person-months allocated, over by 0.14',
+    );
+  });
+
+  it('offers a one-click reduction to the amount that fits', async () => {
+    const { user, repository } = await setup();
+    await open(user);
+    const button = within(row('emp-003', '2026-06')).getAllByRole('button', {
+      name: /Reduce to/,
+    })[0] as HTMLElement;
+    expect(button.textContent).toBe('Reduce to 0.41'); // 0.59 - 0.18
+    await user.click(button);
+    await waitFor(() => expect(row('emp-003', '2026-06')).toBeNull());
+    const stored = (await repository.load()).allocations.find((a) => a.id === 'alloc-073');
+    expect(stored?.amount).toBeCloseTo(0.41, 10);
+  });
+
+  it('refuses text that is not an amount, and unchanged text writes nothing', async () => {
+    const repository = createMemoryPlanRepository(seed);
+    const write = vi.spyOn(repository, 'setAllocationAmount');
+    const { user } = await setup({ repository });
+    await open(user);
+    const input = amountInput(row('emp-003', '2026-06'), 'alloc-073');
+    await user.click(input);
+    await user.tab(); // leave without changing anything
+    expect(write).not.toHaveBeenCalled();
+    await user.click(input);
+    await user.clear(input);
+    await user.type(input, 'abc');
+    await user.tab();
+    expect((await screen.findByRole('alert')).textContent).toMatch(/not an amount/);
+    expect(write).not.toHaveBeenCalled();
+  });
+
+  it('leaves out allocations of zero, which do not contribute', async () => {
+    const { user } = await setup();
+    await open(user);
+    for (const li of document.querySelectorAll('.over-rows > li')) {
+      for (const input of li.querySelectorAll<HTMLInputElement>('tbody input')) {
+        expect(Number(input.value)).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('is reachable from the staffing grid, and an edit there updates the count', async () => {
+    const { user } = await setup();
+    const input = cell(personRow('003'), 2); // Brandt, June, on Design
+    await user.click(input);
+    await user.clear(input);
+    await user.type(input, '0.3'); // 0.3 + 0.59 = 0.89, within capacity
+    await user.tab();
+    await waitFor(() => expect(tab().textContent).toContain('5'));
+    await user.click(screen.getByRole('button', { name: /Review and correct/ }));
+    expect(await screen.findByRole('heading', { name: 'Over capacity' })).toBeTruthy();
+    expect(row('emp-003', '2026-06')).toBeNull();
+    await user.click(screen.getByRole('button', { name: 'Staffing' }));
+    expect(await screen.findByRole('table', { name: /Staffing/ })).toBeTruthy();
+  });
+
+  it('shows people by id when People is unavailable, and still lets amounts be corrected', async () => {
+    const { user } = await setup({ props: { employeeQuery: null, rateQuery: null } });
+    await open(user);
+    expect(row('emp-003', '2026-06').textContent).toContain('emp-003 · Jun 26');
+    const input = amountInput(row('emp-003', '2026-06'), 'alloc-073');
+    await user.click(input);
+    await user.clear(input);
+    await user.type(input, '0.4');
+    await user.tab();
+    await waitFor(() => expect(row('emp-003', '2026-06')).toBeNull());
+  });
+
+  it('says so when nobody is over capacity', async () => {
+    const { user } = await setup();
+    await open(user);
+    // Fix all six through the one-click reduction, one row at a time.
+    for (let guard = 0; guard < 12 && document.querySelector('.over-rows > li'); guard += 1) {
+      const first = document.querySelector('.over-rows > li') as HTMLElement;
+      await user.click(
+        within(first).getAllByRole('button', { name: /Reduce to/ })[0] as HTMLElement,
+      );
+      await waitFor(() => expect(first.isConnected).toBe(false));
+    }
+    expect(await screen.findByText('Nobody is over capacity.')).toBeTruthy();
+    expect(tab().textContent).toContain('0');
+  });
+});

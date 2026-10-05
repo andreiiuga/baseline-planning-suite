@@ -5,7 +5,9 @@ import { monthLabel } from '../domain/display';
 import { unitNeedsPeople } from '../domain/staffing';
 import { UNITS, type Unit } from '../domain/units';
 import type { PlanRepository } from '../ports/planRepository';
+import { buildCapacityIndex } from '../domain/capacity';
 import { BreakdownPanel } from './BreakdownPanel';
+import { OverCapacityView } from './OverCapacityView';
 import { StaffingGrid } from './StaffingGrid';
 import { DELIVERY_CSS } from './delivery.css';
 import { usePeopleModel } from './usePeopleModel';
@@ -39,6 +41,7 @@ export function DeliveryApp({
   const [projectId, setProjectId] = useState<string | null>(null);
   const [requestedUnit, setRequestedUnit] = useState<Unit>('pm');
   const [confirmingReset, setConfirmingReset] = useState(false);
+  const [view, setView] = useState<'staffing' | 'capacity'>('staffing');
   const [windowStart, setWindowStart] = useState<YearMonth>(DEFAULT_WINDOW_START);
   const months = useMemo(
     () => monthRange(windowStart, addMonths(windowStart, WINDOW_LENGTH - 1)),
@@ -56,6 +59,10 @@ export function DeliveryApp({
     () => (snapshot ? snapshot.items.filter((item) => item.projectId === activeProjectId) : []),
     [snapshot, activeProjectId],
   );
+  const overCount = useMemo(
+    () => (snapshot ? buildCapacityIndex(snapshot.allocations).overCapacity().length : 0),
+    [snapshot],
+  );
   const peopleModel = people.status === 'ok' ? people.model : null;
   // Hours and cost need People. If it goes away while one is selected, fall back to a unit that
   // still works rather than showing numbers that would be wrong.
@@ -70,100 +77,133 @@ export function DeliveryApp({
   return (
     <div className="delivery">
       <style>{DELIVERY_CSS}</style>
-      {people.status === 'unavailable' ? (
-        <p className="notice" role="status">
-          People is not available, so hours and cost cannot be shown. Person-months and percent
-          still work.
-        </p>
-      ) : null}
-      <div className="toolbar">
-        <div className="field">
-          <label htmlFor="delivery-project">Project</label>
-          <select
-            id="delivery-project"
-            value={activeProjectId}
-            onChange={(event) => setProjectId(event.target.value)}
-          >
-            {snapshot.projects.map((project) => (
-              <option key={project.id} value={project.id}>
-                {project.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <fieldset className="unit-switch">
-          <legend>Show as</legend>
-          {UNITS.map((candidate) => (
-            <label key={candidate}>
-              <input
-                type="radio"
-                name="delivery-unit"
-                value={candidate}
-                checked={unit === candidate}
-                disabled={unitNeedsPeople(candidate) && !peopleModel}
-                onChange={() => setRequestedUnit(candidate)}
-              />
-              {UNIT_LABELS[candidate](currency.code)}
-            </label>
-          ))}
-        </fieldset>
-        <div className="field reset">
-          {confirmingReset ? (
-            <span role="group" aria-label="Confirm reset">
-              Restore the shipped plan? Your edits will be lost.{' '}
-              <button
-                type="button"
-                onClick={() => void actions.reset().then(() => setConfirmingReset(false))}
-              >
-                Yes, reset
-              </button>{' '}
-              <button type="button" onClick={() => setConfirmingReset(false)}>
-                Keep my data
-              </button>
-            </span>
-          ) : (
-            <button type="button" onClick={() => setConfirmingReset(true)}>
-              Reset demo data
-            </button>
-          )}
-        </div>
-        <div className="field">
-          <span id="delivery-window-label">Months</span>
-          <div role="group" aria-labelledby="delivery-window-label">
-            <button type="button" onClick={() => setWindowStart(addMonths(windowStart, -1))}>
-              ← Earlier
-            </button>{' '}
-            <span>
-              {monthLabel(months[0] ?? windowStart)} – {monthLabel(months.at(-1) ?? windowStart)}
-            </span>{' '}
-            <button type="button" onClick={() => setWindowStart(addMonths(windowStart, 1))}>
-              Later →
-            </button>
-            <button type="button" onClick={() => setWindowStart(DEFAULT_WINDOW_START)}>
-              Reset window
-            </button>
-          </div>
-        </div>
-      </div>
-      <div className="layout">
-        <BreakdownPanel
-          key={activeProjectId}
-          projectId={activeProjectId}
-          state={tree}
-          onCommit={actions.applyTree}
-        />
-        <StaffingGrid
-          projectItems={projectItems}
-          allItems={snapshot.items}
-          projects={snapshot.projects}
+      <nav aria-label="Delivery views" className="view-tabs">
+        <button
+          type="button"
+          aria-current={view === 'staffing' ? 'page' : undefined}
+          onClick={() => setView('staffing')}
+        >
+          Staffing
+        </button>
+        <button
+          type="button"
+          aria-current={view === 'capacity' ? 'page' : undefined}
+          onClick={() => setView('capacity')}
+        >
+          Over capacity{' '}
+          <span className="count" data-count={overCount}>
+            {overCount}
+          </span>
+        </button>
+      </nav>
+      {view === 'capacity' ? (
+        <OverCapacityView
           allocations={snapshot.allocations}
-          months={months}
-          unit={unit}
-          currency={currency}
+          items={snapshot.items}
+          projects={snapshot.projects}
           people={peopleModel}
           onEdit={actions.editCell}
         />
-      </div>
+      ) : (
+        <>
+          {people.status === 'unavailable' ? (
+            <p className="notice" role="status">
+              People is not available, so hours and cost cannot be shown. Person-months and percent
+              still work.
+            </p>
+          ) : null}
+          <div className="toolbar">
+            <div className="field">
+              <label htmlFor="delivery-project">Project</label>
+              <select
+                id="delivery-project"
+                value={activeProjectId}
+                onChange={(event) => setProjectId(event.target.value)}
+              >
+                {snapshot.projects.map((project) => (
+                  <option key={project.id} value={project.id}>
+                    {project.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <fieldset className="unit-switch">
+              <legend>Show as</legend>
+              {UNITS.map((candidate) => (
+                <label key={candidate}>
+                  <input
+                    type="radio"
+                    name="delivery-unit"
+                    value={candidate}
+                    checked={unit === candidate}
+                    disabled={unitNeedsPeople(candidate) && !peopleModel}
+                    onChange={() => setRequestedUnit(candidate)}
+                  />
+                  {UNIT_LABELS[candidate](currency.code)}
+                </label>
+              ))}
+            </fieldset>
+            <div className="field reset">
+              {confirmingReset ? (
+                <span role="group" aria-label="Confirm reset">
+                  Restore the shipped plan? Your edits will be lost.{' '}
+                  <button
+                    type="button"
+                    onClick={() => void actions.reset().then(() => setConfirmingReset(false))}
+                  >
+                    Yes, reset
+                  </button>{' '}
+                  <button type="button" onClick={() => setConfirmingReset(false)}>
+                    Keep my data
+                  </button>
+                </span>
+              ) : (
+                <button type="button" onClick={() => setConfirmingReset(true)}>
+                  Reset demo data
+                </button>
+              )}
+            </div>
+            <div className="field">
+              <span id="delivery-window-label">Months</span>
+              <div role="group" aria-labelledby="delivery-window-label">
+                <button type="button" onClick={() => setWindowStart(addMonths(windowStart, -1))}>
+                  ← Earlier
+                </button>{' '}
+                <span>
+                  {monthLabel(months[0] ?? windowStart)} –{' '}
+                  {monthLabel(months.at(-1) ?? windowStart)}
+                </span>{' '}
+                <button type="button" onClick={() => setWindowStart(addMonths(windowStart, 1))}>
+                  Later →
+                </button>
+                <button type="button" onClick={() => setWindowStart(DEFAULT_WINDOW_START)}>
+                  Reset window
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="layout">
+            <BreakdownPanel
+              key={activeProjectId}
+              projectId={activeProjectId}
+              state={tree}
+              onCommit={actions.applyTree}
+            />
+            <StaffingGrid
+              projectItems={projectItems}
+              allItems={snapshot.items}
+              projects={snapshot.projects}
+              allocations={snapshot.allocations}
+              months={months}
+              unit={unit}
+              currency={currency}
+              people={peopleModel}
+              onEdit={actions.editCell}
+              onReviewOverCapacity={() => setView('capacity')}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 }

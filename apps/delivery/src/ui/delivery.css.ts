@@ -44,5 +44,19 @@ export const DELIVERY_CSS = `
 .delivery .unit-switch input { position: absolute; opacity: 0; }
 .delivery .unit-switch label:has(input:focus-visible) { outline: 2px solid #2f6fd0; }
 .delivery .unit-switch label:has(input:disabled) { opacity: 0.5; cursor: not-allowed; }
+.delivery .view-tabs { display: flex; gap: 0.25rem; border-bottom: 1px solid #cfd6e0; }
+.delivery .view-tabs button { background: none; border: 1px solid transparent; border-bottom: none; padding: 0.35rem 0.8rem; cursor: pointer; font: inherit; border-radius: 4px 4px 0 0; }
+.delivery .view-tabs button[aria-current='page'] { background: #fff; border-color: #cfd6e0; font-weight: 600; margin-bottom: -1px; }
+.delivery .view-tabs .count { display: inline-block; min-width: 1.2rem; text-align: center; background: #e8eef7; border-radius: 999px; font-size: 0.75rem; padding: 0 0.3rem; }
+.delivery .view-tabs .count:not([data-count='0']) { background: #fef3f2; color: #b42318; }
+.delivery .over-rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
+.delivery .over-rows li { border: 1px solid #fda29b; border-radius: 6px; padding: 0.6rem 0.9rem; background: #fffbfa; }
+.delivery .over-rows h3 { margin: 0 0 0.2rem; font-size: 1rem; }
+.delivery .over-rows table { border-collapse: collapse; width: 100%; margin-top: 0.4rem; }
+.delivery .over-rows th, .delivery .over-rows td { padding: 0.25rem 0.4rem; border-bottom: 1px solid #e2e7ee; text-align: left; }
+.delivery .over-rows .num { text-align: right; }
+.delivery .over-rows .amount { width: 5.5rem; text-align: right; font: inherit; padding: 0.15rem 0.25rem; border: 1px solid #cfd6e0; border-radius: 3px; }
+.delivery .over-rows .tag.latest { color: #b42318; font-size: 0.75rem; margin-left: 0.4rem; }
+.delivery .over-list button { margin-bottom: 0.4rem; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 `;

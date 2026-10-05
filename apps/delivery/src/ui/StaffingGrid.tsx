@@ -28,6 +28,8 @@ interface Props {
   /** Null while People is unavailable. */
   readonly people: PeopleModel | null;
   readonly onEdit: (cell: AllocationCell, amountPm: number) => Promise<Allocation>;
+  /** Opens the view where over-capacity person-months can be reviewed and corrected. */
+  readonly onReviewOverCapacity: () => void;
 }
 
 type Message = { readonly kind: 'info' | 'error' | 'warning'; readonly text: string };
@@ -53,6 +55,7 @@ export function StaffingGrid({
   currency,
   people,
   onEdit,
+  onReviewOverCapacity,
 }: Props) {
   const captionId = useId();
   const [message, setMessage] = useState<Message | null>(null);
@@ -352,6 +355,9 @@ export function StaffingGrid({
       {overInView.length > 0 ? (
         <section aria-label="Over capacity" className="over-list">
           <h3>Over capacity</h3>
+          <button type="button" onClick={onReviewOverCapacity}>
+            Review and correct…
+          </button>
           <ul>
             {overInView.map((load) => (
               <li key={`${load.employeeId}|${load.month}`}>
