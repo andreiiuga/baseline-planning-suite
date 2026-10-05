@@ -7,7 +7,7 @@ export const panel = (page: Page, name: 'people' | 'delivery'): Locator =>
 export async function openSection(page: Page, name: 'People' | 'Delivery'): Promise<void> {
   await page
     .getByRole('navigation', { name: 'Sections' })
-    .getByRole('button', { name, exact: true })
+    .getByRole('link', { name, exact: true })
     .click();
 }
 
