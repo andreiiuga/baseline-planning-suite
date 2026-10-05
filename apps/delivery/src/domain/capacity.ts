@@ -18,6 +18,25 @@ export interface PersonMonthLoad {
   readonly over: boolean;
   /** The most recently edited non-zero allocation contributing to this person-month. */
   readonly culprit: Allocation | null;
+  /** Every non-zero allocation that makes up the total, most recently edited first. */
+  readonly contributors: readonly Allocation[];
+}
+
+/** How far above capacity a person-month is, in person-months. Zero when within capacity. */
+export function excessPm(load: Pick<PersonMonthLoad, 'totalPm' | 'over'>): number {
+  return load.over ? load.totalPm - CAPACITY_PM : 0;
+}
+
+/**
+ * The amount an allocation would have to drop to so that, with nothing else changed, the
+ * person-month fits capacity. Never below zero: if the allocation alone cannot absorb the
+ * excess, the rest has to come from somewhere else.
+ */
+export function amountThatFits(
+  allocation: Pick<Allocation, 'amount'>,
+  load: Pick<PersonMonthLoad, 'totalPm' | 'over'>,
+): number {
+  return Math.max(0, allocation.amount - excessPm(load));
 }
 
 export interface CapacityIndex {
@@ -43,15 +62,14 @@ export function monthlyLoads(allocations: readonly Allocation[]): PersonMonthLoa
     const [first] = group;
     if (!first) continue;
     const totalPm = group.reduce((sum, a) => sum + a.amount, 0);
-    const culprit = group
-      .filter((a) => a.amount > 0)
-      .reduce<Allocation | null>((latest, a) => (!latest || a.seq > latest.seq ? a : latest), null);
+    const contributors = group.filter((a) => a.amount > 0).sort((a, b) => b.seq - a.seq);
     loads.push({
       employeeId: first.employeeId,
       month: first.month,
       totalPm,
       over: isOverCapacity(totalPm),
-      culprit,
+      culprit: contributors[0] ?? null,
+      contributors,
     });
   }
   return loads;
